@@ -23,7 +23,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 /**
  *
@@ -40,16 +39,19 @@ public class PlaylistController {
     SongFacade songManager;
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("{pid}/")
+    @Produces(MediaType.APPLICATION_JSON)
     public Collection<Song> getPlaylist(@PathParam("pid") int id) {
         Playlist playlist = playlistManager.find(id);
         Collection<Song> songs = playlist.getSongCollection();
-        List<Song> song = new ArrayList();
-        for (Song s : songs) {
-            song.add(songManager.find(s.getId()));
-        }
         return songs;
+    }
+
+    @GET
+    @Path("{pid}/{songid}/")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Song getSongInPlaylist(@PathParam("songid") int songid) {
+        return songManager.find(songid);
     }
 
     @GET
@@ -62,14 +64,16 @@ public class PlaylistController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Playlist addPlaylist(Playlist playlist, @PathParam("id") int id) {
-        playlist.setProfileid(profileManager.find(id));    
+        if (profileManager.find(id) != null) {
+            playlist.setProfileid(profileManager.find(id));
+        }
         List<Song> so = new ArrayList<>();
         Collection<Song> songs = playlist.getSongCollection();
         for (Song s : songs) {
             so.add(songManager.find(s.getId()));
         }
         playlist.setSongCollection(so);
-        playlistManager.edit(playlist);
+        playlistManager.create(playlist);
         return playlist;
     }
 
@@ -77,17 +81,20 @@ public class PlaylistController {
     @Path("{pid}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Song> addSongsToPlaylist(Playlist playlist, @PathParam("pid") int pid, @PathParam("id") int id) {
-        playlist.setId(pid);
-        playlist.setProfileid(profileManager.find(id));
-        List<Song> so = new ArrayList<>();
+    public String addSongsToPlaylist(Playlist playlist, @PathParam("pid") int pid) {
+        Playlist mPlaylist = new Playlist();
+
+        if (playlistManager.find(pid) != null) {
+            mPlaylist = playlistManager.find(pid);
+        }
+        Collection<Song> updatedPlaylist = mPlaylist.getSongCollection();
         Collection<Song> songs = playlist.getSongCollection();
         for (Song s : songs) {
-            so.add(songManager.find(s.getId()));
+            updatedPlaylist.add(songManager.find(s.getId()));
         }
-        playlist.setSongCollection(so);
-        playlistManager.edit(playlist);
-        return so;
+        mPlaylist.setSongCollection(updatedPlaylist);
+        playlistManager.edit(mPlaylist);
+        return "Updated";
     }
 
     @DELETE

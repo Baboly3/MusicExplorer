@@ -39,6 +39,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Artist.findAll", query = "SELECT a FROM Artist a"),
     @NamedQuery(name = "Artist.findById", query = "SELECT a FROM Artist a WHERE a.id = :id"),
     @NamedQuery(name = "Artist.findByName", query = "SELECT a FROM Artist a WHERE a.name = :name"),
+    @NamedQuery(name = "Song.findByGenrer", query = "SELECT a FROM Artist a WHERE a.genrer = :genrer"),
     @NamedQuery(name = "Artist.findByHistory", query = "SELECT a FROM Artist a WHERE a.history = :history"),
     @NamedQuery(name = "Artist.findByCreated", query = "SELECT a FROM Artist a WHERE a.created = :created")})
 public class Artist implements DatePersistance, Serializable {
@@ -58,6 +59,9 @@ public class Artist implements DatePersistance, Serializable {
     @Column(name = "created")
     @Temporal(TemporalType.DATE)
     private Date created;
+    @Size(max = 45)
+    @Column(name = "genrer")
+    private String genrer;
     @Column(name = "updated")
     @Temporal(TemporalType.DATE)
     private Date updated;
@@ -102,6 +106,14 @@ public class Artist implements DatePersistance, Serializable {
     public Date getUpdated() {
         return updated;
     }
+
+    public String getGenrer() {
+        return genrer;
+    }
+
+    public void setGenrer(String genrer) {
+        this.genrer = genrer;
+    }
     
 
     @XmlTransient
@@ -135,18 +147,18 @@ public class Artist implements DatePersistance, Serializable {
 
     @Override
     public String toString() {
-        return "com.musicexplorer.org.Artist[ id=" + id + " ]";
+        return "Artist{" + "id=" + id + ", name=" + name + ", history=" + history + ", created=" + created + ", genrer=" + genrer + ", updated=" + updated + ", songCollection=" + songCollection + '}';
     }
 
     @Override
     @PrePersist
-    public void SetCreatedDate() {
+    public void SetCreated() {
         this.created = new Date();
     }
 
     @Override
     @PreUpdate
-    public void SetUpdatedDate() {
+    public void SetUpdated() {
         this.updated = new Date();
     }
 

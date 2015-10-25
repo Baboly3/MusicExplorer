@@ -7,15 +7,18 @@ package com.musicexplorer.model;
 
 import com.musicexplorer.model.helper.DatePersistance;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -39,7 +42,6 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Song.findByIdSong", query = "SELECT s FROM Song s WHERE s.id  = :id"),
     @NamedQuery(name = "Song.findByTitle", query = "SELECT s FROM Song s WHERE s.title = :title"),
     @NamedQuery(name = "Song.findByDuration", query = "SELECT s FROM Song s WHERE s.duration = :duration"),
-    @NamedQuery(name = "Song.findByGenrer", query = "SELECT s FROM Song s WHERE s.genrer = :genrer"),
     @NamedQuery(name = "Song.findByCreated", query = "SELECT s FROM Song s WHERE s.created = :created"),
     @NamedQuery(name = "Song.findByArtistid", query = "SELECT s FROM Song s WHERE s.artistId = :artistId")})
 public class Song implements DatePersistance, Serializable {
@@ -55,9 +57,6 @@ public class Song implements DatePersistance, Serializable {
     private String title;
     @Column(name = "duration")
     private Integer duration;
-    @Size(max = 45)
-    @Column(name = "genrer")
-    private String genrer;
     @Column(name = "created")
     @Temporal(TemporalType.DATE)
     private Date created;
@@ -67,9 +66,8 @@ public class Song implements DatePersistance, Serializable {
     @JoinColumn(name = "artistId", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Artist artistId;
-    @JoinColumn(name = "playlistId", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private Playlist playlistId;
+    @ManyToMany(mappedBy = "songCollection", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Collection<Playlist> playlistCollection;
     @JoinColumn(name = "shareId", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Share shareId;
@@ -92,15 +90,6 @@ public class Song implements DatePersistance, Serializable {
     public void setDuration(Integer duration) {
         this.duration = duration;
     }
-
-    public String getGenrer() {
-        return genrer;
-    }
-
-    public void setGenrer(String genrer) {
-        this.genrer = genrer;
-    }
-
     public Artist getArtist() {
         return artistId;
     }
@@ -109,13 +98,30 @@ public class Song implements DatePersistance, Serializable {
         this.artistId = artist;
     }
 
-    public Playlist getPlaylistid() {
-        return playlistId;
+    public Artist getArtistId() {
+        return artistId;
     }
 
-    public void setPlaylistid(Playlist playlistid) {
-        this.playlistId = playlistid;
+    public void setArtistId(Artist artistId) {
+        this.artistId = artistId;
     }
+
+    public Collection<Playlist> getPlaylistCollection() {
+        return playlistCollection;
+    }
+
+    public void setPlaylistCollection(Collection<Playlist> playlistCollection) {
+        this.playlistCollection = playlistCollection;
+    }
+
+    public Share getShareId() {
+        return shareId;
+    }
+
+    public void setShareId(Share shareId) {
+        this.shareId = shareId;
+    }
+
 
     public Share getShareid() {
         return shareId;
@@ -160,21 +166,20 @@ public class Song implements DatePersistance, Serializable {
         }
         return true;
     }
-
     @Override
     public String toString() {
-        return "Song{" + "id=" + id + ", title=" + title + ", duration=" + duration + ", genrer=" + genrer + ", created=" + created + ", artist=" + artistId + ", playlistid=" + playlistId + ", shareid=" + shareId + '}';
+        return "Song{" + "id=" + id + ", title=" + title + ", duration=" + duration + ", created=" + created + ", updated=" + updated + ", artistId=" + artistId + ", playlistCollection=" + playlistCollection + ", shareId=" + shareId + '}';
     }
 
    @Override
    @PrePersist
-    public void SetCreatedDate() {
+    public void SetCreated() {
         this.created = new Date();
     }
 
     @Override
     @PreUpdate
-    public void SetUpdatedDate() {
+    public void SetUpdated() {
         this.updated = new Date();
     }
 

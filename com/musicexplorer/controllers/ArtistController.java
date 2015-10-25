@@ -50,7 +50,7 @@ public class ArtistController {
     }
 
     @GET
-    @Path("/{id}/songs")
+    @Path("{id}/songs")
     @Produces(MediaType.APPLICATION_JSON)
     public List<Song> getSong(@PathParam("id") int id) {
         Query query = am.getEm().createNamedQuery("Song.findByArtistid", Song.class);
@@ -73,6 +73,19 @@ public class ArtistController {
         mArtist = artist;
         am.create(mArtist);
         return mArtist;
+    }
+
+    @POST
+    @Path("{id}/songs")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Song addSongToArtist(Song song, @PathParam("id") int id) {
+        Song mSong = new Song();
+        mSong = song;
+        Artist artist = am.find(id);
+        mSong.setArtist(artist);
+        sm.create(mSong);
+        return mSong;
     }
 
     @DELETE

@@ -151,13 +151,13 @@ public class Profile implements DatePersistance, Serializable {
 
    @Override
    @PrePersist
-    public void SetCreatedDate() {
+    public void SetCreated() {
         this.created = new Date();
     }
 
     @Override
     @PreUpdate
-    public void SetUpdatedDate() {
+    public void SetUpdated() {
         this.updated = new Date();
     }
 

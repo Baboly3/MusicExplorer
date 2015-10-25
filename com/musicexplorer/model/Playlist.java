@@ -18,6 +18,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -27,7 +28,6 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -57,11 +57,10 @@ public class Playlist implements DatePersistance, Serializable {
     @Column(name = "updated")
     @Temporal(TemporalType.DATE)
     private Date updated;
-    @NotNull
-    @Column(name = "name")
     @Size(max = 45)
+    @Column(name = "playlist")
     private String name;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "playlistId")
+    @ManyToMany
     @XmlElement(name = "songs")
     private Collection<Song> songCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "playlistId")
@@ -91,6 +90,15 @@ public class Playlist implements DatePersistance, Serializable {
         return created;
     }
 
+    public Profile getProfileId() {
+        return profileId;
+    }
+
+    public void setProfileId(Profile profileId) {
+        this.profileId = profileId;
+    }
+
+    
     @XmlTransient
     public Collection<Song> getSongCollection() {
         return songCollection;
@@ -129,8 +137,6 @@ public class Playlist implements DatePersistance, Serializable {
         this.name = name;
     }
 
-
-
     @XmlTransient
     public Collection<Share> getShareCollection() {
         return shareCollection;
@@ -167,13 +173,13 @@ public class Playlist implements DatePersistance, Serializable {
 
    @Override
    @PrePersist
-    public void SetCreatedDate() {
+    public void SetCreated() {
         this.created = new Date();
     }
 
     @Override
     @PreUpdate
-    public void SetUpdatedDate() {
+    public void SetUpdated() {
         this.updated = new Date();
     }
 

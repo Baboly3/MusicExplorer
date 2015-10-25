@@ -21,8 +21,8 @@ import javax.persistence.PreUpdate;
 public interface DatePersistance {
 
 
-    public void SetCreatedDate();
+    public void SetCreated();
 
-    public void SetUpdatedDate();
+    public void SetUpdated();
    
 }
