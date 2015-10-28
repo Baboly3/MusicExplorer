@@ -5,14 +5,12 @@
  */
 package com.musicexplorer.controllers;
 
-import com.musicexplorer.model.Artist;
-import com.musicexplorer.model.Profile;
-import com.musicexplorer.model.Song;
 import com.musicexplorer.org.ejb.ArtistFacade;
 import com.musicexplorer.org.ejb.SongFacade;
+import com.musicexplorer.org.entity.Artist;
+import com.musicexplorer.org.entity.Song;
 import java.util.List;
 import javax.ejb.EJB;
-import javax.persistence.Query;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;

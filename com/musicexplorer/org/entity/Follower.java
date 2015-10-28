@@ -4,10 +4,9 @@
  * and open the template in the editor.
  */
 
-package com.musicexplorer.model;
+package com.musicexplorer.org.entity;
 
 import java.io.Serializable;
-import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,10 +17,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -41,12 +37,15 @@ public class Follower implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @JoinColumn(name = "playlistId", referencedColumnName = "id")
+    @JoinColumn(name = "Artist_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private Playlist playlistId;
-    @Column(name = "updated")
-    @Temporal(TemporalType.DATE)
-    private Date updated;
+    private Artist artistid;
+    @JoinColumn(name = "Playlist_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Playlist playlistid;
+    @JoinColumn(name = "Profile_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Profile profileid;
 
     public Follower() {
     }
@@ -63,24 +62,29 @@ public class Follower implements Serializable {
         this.id = id;
     }
 
-    public Date getUpdated() {
-        return updated;
+    public Artist getArtistid() {
+        return artistid;
     }
 
-    @PreUpdate
-    public void setUpdated() {
-        this.updated = new Date();
+    public void setArtistid(Artist artistid) {
+        this.artistid = artistid;
     }
 
-    public Playlist getPlaylistId() {
-        return playlistId;
+    public Playlist getPlaylistid() {
+        return playlistid;
     }
 
-    public void setPlaylistId(Playlist playlistId) {
-        this.playlistId = playlistId;
+    public void setPlaylistid(Playlist playlistid) {
+        this.playlistid = playlistid;
     }
-    
-    
+
+    public Profile getProfileid() {
+        return profileid;
+    }
+
+    public void setProfileid(Profile profileid) {
+        this.profileid = profileid;
+    }
 
     @Override
     public int hashCode() {
@@ -104,7 +108,7 @@ public class Follower implements Serializable {
 
     @Override
     public String toString() {
-        return "com.musicexplorer.org.Follower[ id=" + id + " ]";
+        return "com.musicexplorer.org.entity.Follower[ id=" + id + " ]";
     }
 
 }

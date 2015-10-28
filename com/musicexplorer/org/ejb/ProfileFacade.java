@@ -6,7 +6,7 @@
 
 package com.musicexplorer.org.ejb;
 
-import com.musicexplorer.model.Profile;
+import com.musicexplorer.org.entity.Profile;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

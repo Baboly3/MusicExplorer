@@ -5,10 +5,10 @@
  */
 package com.musicexplorer.controllers;
 
-import com.musicexplorer.model.Artist;
-import com.musicexplorer.model.Song;
 import com.musicexplorer.org.ejb.ArtistFacade;
 import com.musicexplorer.org.ejb.SongFacade;
+import com.musicexplorer.org.entity.Artist;
+import com.musicexplorer.org.entity.Song;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.persistence.Query;
@@ -53,9 +53,9 @@ public class ArtistController {
     @Path("{id}/songs")
     @Produces(MediaType.APPLICATION_JSON)
     public List<Song> getSong(@PathParam("id") int id) {
-        Query query = am.getEm().createNamedQuery("Song.findByArtistid", Song.class);
+        Query query = am.getEm().createNamedQuery("Song.findByArtist", Song.class);
         Artist artist = am.find(id);
-        query.setParameter("artistId", artist);
+        query.setParameter("artist", artist);
         List<Song> songs = query.getResultList();
         return songs;
     }
@@ -94,6 +94,15 @@ public class ArtistController {
     public void delArtist(@PathParam("id") int id) {
         if (am.find(id) != null) {
             am.remove(am.find(id));
+        }
+    }
+    
+    @DELETE
+    @Path("{id}/songs/{songId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void delArtistSong(@PathParam("songId") int songId) {
+        if (am.find(songId) != null) {
+            am.remove(am.find(songId));
         }
     }
 

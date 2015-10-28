@@ -5,23 +5,20 @@
  */
 package com.musicexplorer.controllers;
 
-import com.musicexplorer.model.Profile;
 import com.musicexplorer.org.ejb.ProfileFacade;
+import com.musicexplorer.org.entity.Profile;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 /**
  *
@@ -29,6 +26,7 @@ import javax.ws.rs.core.UriInfo;
  */
 @Path("profiles")
 public class ProfileController {
+
 
     @EJB
     ProfileFacade pm;
@@ -48,7 +46,7 @@ public class ProfileController {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public Profile addProfile(Profile profile){
+    public Profile addProfile(Profile profile) {
         Profile mProfile = new Profile();
         mProfile = profile;
         pm.create(mProfile);
@@ -59,21 +57,27 @@ public class ProfileController {
     @Path("{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public void delProfile(@PathParam("id") int id) {
-        if(pm.find(id) != null){
-        pm.remove(pm.find(id));
+        if (pm.find(id) != null) {
+            pm.remove(pm.find(id));
         }
     }
+
     @PUT
     @Path("{id}")
     public Response editProfile(Profile profile, @PathParam("id") int id) {
         profile.setId(id);
-        if(pm.find(id) != null){
-        pm.edit(profile);
-         return Response.ok().build();
+        if (pm.find(id) != null) {
+            pm.edit(profile);
+            return Response.ok().build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
-        else {
-        return Response.status(Response.Status.NOT_FOUND).build();
-        }
-        
     }
+
+//    @GET
+//    @Path("{id}/playlists")
+//    public PlaylistController getPlaylistController() {
+//        return new PlaylistController();
+//    }
+
 }

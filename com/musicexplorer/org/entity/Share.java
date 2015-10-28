@@ -4,32 +4,26 @@
  * and open the template in the editor.
  */
 
-package com.musicexplorer.model;
+package com.musicexplorer.org.entity;
 
-import com.musicexplorer.model.helper.DatePersistance;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -43,7 +37,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Share.findById", query = "SELECT s FROM Share s WHERE s.id = :id"),
     @NamedQuery(name = "Share.findByDate", query = "SELECT s FROM Share s WHERE s.date = :date"),
     @NamedQuery(name = "Share.findByNote", query = "SELECT s FROM Share s WHERE s.note = :note")})
-public class Share implements DatePersistance, Serializable {
+public class Share implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,17 +50,14 @@ public class Share implements DatePersistance, Serializable {
     @Size(max = 255)
     @Column(name = "note")
     private String note;
-    @Column(name = "created")
-    @Temporal(TemporalType.DATE)
-    private Date created;
-    @Column(name = "updated")
-    @Temporal(TemporalType.DATE)
-    private Date updated;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "shareId")
-    private Collection<Song> songCollection;
-    @JoinColumn(name = "playlistId", referencedColumnName = "id")
+    @JoinColumn(name = "Playlist_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private Playlist playlistId;
+    private Playlist playlistid;
+    @JoinColumns({
+        @JoinColumn(name = "Song_id", referencedColumnName = "id"),
+        @JoinColumn(name = "Song_Artist_id", referencedColumnName = "Artist_id")})
+    @ManyToOne(optional = false)
+    private Song song;
 
     public Share() {
     }
@@ -99,29 +90,20 @@ public class Share implements DatePersistance, Serializable {
         this.note = note;
     }
 
-    public Date getCreated() {
-        return created;
-    }
-
-    public Date getUpdated() {
-        return updated;
-    }
-
-    @XmlTransient
-    public Collection<Song> getSongCollection() {
-        return songCollection;
-    }
-
-    public void setSongCollection(Collection<Song> songCollection) {
-        this.songCollection = songCollection;
-    }
-
     public Playlist getPlaylistid() {
-        return playlistId;
+        return playlistid;
     }
 
     public void setPlaylistid(Playlist playlistid) {
-        this.playlistId = playlistid;
+        this.playlistid = playlistid;
+    }
+
+    public Song getSong() {
+        return song;
+    }
+
+    public void setSong(Song song) {
+        this.song = song;
     }
 
     @Override
@@ -146,20 +128,7 @@ public class Share implements DatePersistance, Serializable {
 
     @Override
     public String toString() {
-        return "com.musicexplorer.org.Share[ id=" + id + " ]";
+        return "com.musicexplorer.org.entity.Share[ id=" + id + " ]";
     }
-
-   @Override
-   @PrePersist
-    public void SetCreated() {
-        this.created = new Date();
-    }
-
-    @Override
-    @PreUpdate
-    public void SetUpdated() {
-        this.updated = new Date();
-    }
-
 
 }

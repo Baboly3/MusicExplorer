@@ -3,8 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
-package com.musicexplorer.model;
+package com.musicexplorer.org.entity;
 
 import com.musicexplorer.model.helper.DatePersistance;
 import java.io.Serializable;
@@ -18,6 +17,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Babak Tamjidi  baboly@gmail.com
+ * @author Babak Tamjidi baboly@gmail.com
  */
 @Entity
 @Table(name = "playlist")
@@ -45,30 +45,35 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Playlist.findById", query = "SELECT p FROM Playlist p WHERE p.id = :id"),
     @NamedQuery(name = "Playlist.findByCreated", query = "SELECT p FROM Playlist p WHERE p.created = :created")})
 public class Playlist implements DatePersistance, Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
+    @Size(max = 45)
+    @Column(name = "Name")
+    private String playlist;
     @Column(name = "created")
     @Temporal(TemporalType.DATE)
     private Date created;
     @Column(name = "updated")
     @Temporal(TemporalType.DATE)
     private Date updated;
-    @Size(max = 45)
-    @Column(name = "playlist")
-    private String name;
-    @ManyToMany
     @XmlElement(name = "songs")
+    @JoinTable(name = "song_has_playlist", joinColumns = {
+        @JoinColumn(name = "Playlist_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "Song_id", referencedColumnName = "id"),
+        @JoinColumn(name = "Song_Artist_id", referencedColumnName = "artistId")})
+    @ManyToMany
     private Collection<Song> songCollection;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "playlistId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "playlistid")
     private Collection<Follower> followerCollection;
-    @JoinColumn(name = "profileId", referencedColumnName = "id")
+    @JoinColumn(name = "Profile_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private Profile profileId;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "playlistId")
+    private Profile profileid;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "playlistid")
     private Collection<Share> shareCollection;
 
     public Playlist() {
@@ -90,15 +95,18 @@ public class Playlist implements DatePersistance, Serializable {
         return created;
     }
 
-    public Profile getProfileId() {
-        return profileId;
+    public Date getUpdated() {
+        return updated;
     }
 
-    public void setProfileId(Profile profileId) {
-        this.profileId = profileId;
+    public String getPlaylist() {
+        return playlist;
     }
 
-    
+    public void setPlaylist(String playlist) {
+        this.playlist = playlist;
+    }
+
     @XmlTransient
     public Collection<Song> getSongCollection() {
         return songCollection;
@@ -118,23 +126,11 @@ public class Playlist implements DatePersistance, Serializable {
     }
 
     public Profile getProfileid() {
-        return profileId;
+        return profileid;
     }
 
     public void setProfileid(Profile profileid) {
-        this.profileId = profileid;
-    }
-
-    public Date getUpdated() {
-        return updated;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+        this.profileid = profileid;
     }
 
     @XmlTransient
@@ -168,20 +164,18 @@ public class Playlist implements DatePersistance, Serializable {
 
     @Override
     public String toString() {
-        return "com.musicexplorer.org.Playlist[ id=" + id + " ]";
+        return "com.musicexplorer.org.entity.Playlist[ id=" + id + " ]";
     }
 
-   @Override
-   @PrePersist
+    @Override
+    @PrePersist
     public void SetCreated() {
-        this.created = new Date();
+        created = new Date();
     }
 
     @Override
     @PreUpdate
     public void SetUpdated() {
-        this.updated = new Date();
+        updated = new Date();
     }
-
-
 }

@@ -5,11 +5,11 @@
  */
 package com.musicexplorer.controllers;
 
-import com.musicexplorer.model.Playlist;
-import com.musicexplorer.model.Song;
 import com.musicexplorer.org.ejb.PlaylistFacade;
 import com.musicexplorer.org.ejb.ProfileFacade;
 import com.musicexplorer.org.ejb.SongFacade;
+import com.musicexplorer.org.entity.Playlist;
+import com.musicexplorer.org.entity.Song;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -28,7 +28,7 @@ import javax.ws.rs.core.MediaType;
  *
  * @author Babak Tamjidi baboly@gmail.com
  */
-@Path("profiles/{id}/playlists")
+@Path("/profiles/{id}/playlists/")
 public class PlaylistController {
 
     @EJB

@@ -6,7 +6,7 @@
 
 package com.musicexplorer.org.ejb;
 
-import com.musicexplorer.model.Share;
+import com.musicexplorer.org.entity.Share;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

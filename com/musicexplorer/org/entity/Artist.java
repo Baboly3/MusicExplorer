@@ -3,8 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
-package com.musicexplorer.model;
+package com.musicexplorer.org.entity;
 
 import com.musicexplorer.model.helper.DatePersistance;
 import java.io.Serializable;
@@ -31,18 +30,20 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Babak Tamjidi  baboly@gmail.com
+ * @author Babak Tamjidi baboly@gmail.com
  */
 @Entity
-@Table(name = "profile")
+@Table(name = "artist")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Profile.findAll", query = "SELECT p FROM Profile p"),
-    @NamedQuery(name = "Profile.findById", query = "SELECT p FROM Profile p WHERE p.id = :id"),
-    @NamedQuery(name = "Profile.findByFirstName", query = "SELECT p FROM Profile p WHERE p.firstName = :firstName"),
-    @NamedQuery(name = "Profile.findByLastName", query = "SELECT p FROM Profile p WHERE p.lastName = :lastName"),
-    @NamedQuery(name = "Profile.findByPassword", query = "SELECT p FROM Profile p WHERE p.password = :password")})
-public class Profile implements DatePersistance, Serializable {
+    @NamedQuery(name = "Artist.findAll", query = "SELECT a FROM Artist a"),
+    @NamedQuery(name = "Artist.findById", query = "SELECT a FROM Artist a WHERE a.id = :id"),
+    @NamedQuery(name = "Artist.findByName", query = "SELECT a FROM Artist a WHERE a.name = :name"),
+    @NamedQuery(name = "Artist.findByHistory", query = "SELECT a FROM Artist a WHERE a.history = :history"),
+    @NamedQuery(name = "Artist.findByGenrer", query = "SELECT a FROM Artist a WHERE a.genrer = :genrer"),
+    @NamedQuery(name = "Artist.findByCreated", query = "SELECT a FROM Artist a WHERE a.created = :created")})
+public class Artist implements DatePersistance, Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,27 +51,29 @@ public class Profile implements DatePersistance, Serializable {
     @Column(name = "id")
     private Integer id;
     @Size(max = 45)
-    @Column(name = "firstName")
-    private String firstName;
+    @Column(name = "name")
+    private String name;
+    @Size(max = 255)
+    @Column(name = "history")
+    private String history;
     @Size(max = 45)
-    @Column(name = "lastName")
-    private String lastName;
-    @Size(max = 45)
-    @Column(name = "password")
-    private String password;
+    @Column(name = "genrer")
+    private String genrer;
     @Column(name = "created")
     @Temporal(TemporalType.DATE)
     private Date created;
     @Column(name = "updated")
     @Temporal(TemporalType.DATE)
     private Date updated;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "profileId")
-    private Collection<Playlist> playlistCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "artist")
+    private Collection<Song> songCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "artistid")
+    private Collection<Follower> followerCollection;
 
-    public Profile() {
+    public Artist() {
     }
 
-    public Profile(Integer id) {
+    public Artist(Integer id) {
         this.id = id;
     }
 
@@ -82,28 +85,20 @@ public class Profile implements DatePersistance, Serializable {
         this.id = id;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getName() {
+        return name;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getLastName() {
-        return lastName;
+    public String getHistory() {
+        return history;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public void setHistory(String history) {
+        this.history = history;
     }
 
     public Date getCreated() {
@@ -113,15 +108,35 @@ public class Profile implements DatePersistance, Serializable {
     public Date getUpdated() {
         return updated;
     }
-    
 
-    @XmlTransient
-    public Collection<Playlist> getPlaylistCollection() {
-        return playlistCollection;
+    public void setCreated(Date created) {
+        this.created = created;
     }
 
-    public void setPlaylistCollection(Collection<Playlist> playlistCollection) {
-        this.playlistCollection = playlistCollection;
+    public String getGenrer() {
+        return genrer;
+    }
+
+    public void setGenrer(String genrer) {
+        this.genrer = genrer;
+    }
+
+    @XmlTransient
+    public Collection<Song> getSongCollection() {
+        return songCollection;
+    }
+
+    public void setSongCollection(Collection<Song> songCollection) {
+        this.songCollection = songCollection;
+    }
+
+    @XmlTransient
+    public Collection<Follower> getFollowerCollection() {
+        return followerCollection;
+    }
+
+    public void setFollowerCollection(Collection<Follower> followerCollection) {
+        this.followerCollection = followerCollection;
     }
 
     @Override
@@ -134,10 +149,10 @@ public class Profile implements DatePersistance, Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Profile)) {
+        if (!(object instanceof Artist)) {
             return false;
         }
-        Profile other = (Profile) object;
+        Artist other = (Artist) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -146,19 +161,19 @@ public class Profile implements DatePersistance, Serializable {
 
     @Override
     public String toString() {
-        return "com.musicexplorer.org.Profile[ id=" + id + " ]";
+        return "com.musicexplorer.org.entity.Artist[ id=" + id + " ]";
     }
 
-   @Override
-   @PrePersist
+    @Override
+    @PrePersist
     public void SetCreated() {
-        this.created = new Date();
+        created = new Date();
     }
 
     @Override
     @PreUpdate
     public void SetUpdated() {
-        this.updated = new Date();
+        updated = new Date();
     }
 
 }
