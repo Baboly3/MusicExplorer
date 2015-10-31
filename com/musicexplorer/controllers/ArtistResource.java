@@ -52,8 +52,8 @@ public class ArtistResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id}/")
-    public Response getArtist(@PathParam("id") int id) {
+    @Path("{artistId}/")
+    public Response getArtist(@PathParam("artistId") int id) {
         List<Artist> list = new ArrayList<Artist>();
         list.add(am.find(id));
         List<GenericLinkWrapper> artist = genericLWF.getById(list);
@@ -94,16 +94,16 @@ public class ArtistResource {
     }
 
     @DELETE
-    @Path("{id}")
-    public void delArtist(@PathParam("id") int id) {
+    @Path("{artistId}")
+    public void delArtist(@PathParam("artistId") int id) {
         if (am.find(id) != null) {
             am.remove(am.find(id));
         }
     }
 
     @PUT
-    @Path("{id}")
-    public Response editArtist(Artist artist, @PathParam("id") int id) {
+    @Path("{artistId}")
+    public Response editArtist(Artist artist, @PathParam("artistId") int id) {
         artist.setId(id);
         if (am.find(id) != null) {
             am.edit(artist);
@@ -113,7 +113,7 @@ public class ArtistResource {
         }
     }
 
-    @Path("{id}/songs/")
+    @Path("{artistId}/songs/")
     public SongResource getSongs() {
         return new SongResource();
     }

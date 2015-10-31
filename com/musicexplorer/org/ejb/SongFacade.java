@@ -6,10 +6,13 @@
 
 package com.musicexplorer.org.ejb;
 
+import com.musicexplorer.org.entity.Artist;
 import com.musicexplorer.org.entity.Song;
+import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 /**
  *
@@ -31,6 +34,18 @@ public class SongFacade extends AbstractFacade<Song> {
 
     public EntityManager getEm() {
         return em;
+    }
+    
+    public List<Song> getSongsByArtist(int id){
+        Query query = em.createNamedQuery("Song.findByArtist", Song.class);
+        query.setParameter("artist", getArtist(id));
+        List<Song> ArtistSongList = query.getResultList();
+        return ArtistSongList;
+    }
+    
+    public Artist getArtist(int id){
+        Artist artist = em.find(Artist.class, id);
+        return artist;
     }
 
 }
