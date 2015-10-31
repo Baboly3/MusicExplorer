@@ -117,9 +117,4 @@ public class ProfileResource{
         return new PlaylistResource();
     }
 
-//    @GET
-//    @Path("{id}/playlists")
-//    public PlaylistController getPlaylistController() {
-//        return new PlaylistController();
-//    }
 }
