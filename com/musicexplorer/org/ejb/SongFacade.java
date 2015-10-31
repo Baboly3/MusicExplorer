@@ -29,4 +29,8 @@ public class SongFacade extends AbstractFacade<Song> {
         super(Song.class);
     }
 
+    public EntityManager getEm() {
+        return em;
+    }
+
 }

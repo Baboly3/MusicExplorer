@@ -29,4 +29,10 @@ public class FollowerFacade extends AbstractFacade<Follower> {
         super(Follower.class);
     }
 
+    public EntityManager getEm() {
+        return em;
+    }
+    
+    
+
 }
