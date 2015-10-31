@@ -113,9 +113,8 @@ public class ArtistResource {
         }
     }
 
-    @GET
     @Path("{id}/songs/")
-    public SongResource getSongResource() {
+    public SongResource getSongs() {
         return new SongResource();
     }
 }
