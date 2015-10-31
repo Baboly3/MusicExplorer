@@ -3,8 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
-package com.musicexplorer.model;
+package com.musicexplorer.org.entity;
 
 import com.musicexplorer.model.helper.DatePersistance;
 import java.io.Serializable;
@@ -18,6 +17,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -27,7 +28,6 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Babak Tamjidi  baboly@gmail.com
+ * @author Babak Tamjidi baboly@gmail.com
  */
 @Entity
 @Table(name = "playlist")
@@ -43,33 +43,38 @@ import javax.xml.bind.annotation.XmlTransient;
 @NamedQueries({
     @NamedQuery(name = "Playlist.findAll", query = "SELECT p FROM Playlist p"),
     @NamedQuery(name = "Playlist.findById", query = "SELECT p FROM Playlist p WHERE p.id = :id"),
+    @NamedQuery(name = "Playlist.findByProfileId", query = "SELECT p FROM Playlist p WHERE p.profileid = :profileid"),
     @NamedQuery(name = "Playlist.findByCreated", query = "SELECT p FROM Playlist p WHERE p.created = :created")})
 public class Playlist implements DatePersistance, Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
+    @Size(max = 45)
+    @Column(name = "Name")
+    private String playlist;
     @Column(name = "created")
     @Temporal(TemporalType.DATE)
     private Date created;
     @Column(name = "updated")
     @Temporal(TemporalType.DATE)
     private Date updated;
-    @NotNull
-    @Column(name = "name")
-    @Size(max = 45)
-    private String name;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "playlistId")
     @XmlElement(name = "songs")
+    @JoinTable(name = "song_has_playlist", joinColumns = {
+        @JoinColumn(name = "Playlist_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "Song_id", referencedColumnName = "id"),
+        @JoinColumn(name = "Song_Artist_id", referencedColumnName = "artistId")})
+    @ManyToMany
     private Collection<Song> songCollection;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "playlistId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "playlistid")
     private Collection<Follower> followerCollection;
-    @JoinColumn(name = "profileId", referencedColumnName = "id")
+    @JoinColumn(name = "Profile_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private Profile profileId;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "playlistId")
+    private Profile profileid;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "playlistid")
     private Collection<Share> shareCollection;
 
     public Playlist() {
@@ -91,6 +96,18 @@ public class Playlist implements DatePersistance, Serializable {
         return created;
     }
 
+    public Date getUpdated() {
+        return updated;
+    }
+
+    public String getPlaylist() {
+        return playlist;
+    }
+
+    public void setPlaylist(String playlist) {
+        this.playlist = playlist;
+    }
+
     @XmlTransient
     public Collection<Song> getSongCollection() {
         return songCollection;
@@ -110,26 +127,12 @@ public class Playlist implements DatePersistance, Serializable {
     }
 
     public Profile getProfileid() {
-        return profileId;
+        return profileid;
     }
 
     public void setProfileid(Profile profileid) {
-        this.profileId = profileid;
+        this.profileid = profileid;
     }
-
-    public Date getUpdated() {
-        return updated;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-
 
     @XmlTransient
     public Collection<Share> getShareCollection() {
@@ -162,20 +165,18 @@ public class Playlist implements DatePersistance, Serializable {
 
     @Override
     public String toString() {
-        return "com.musicexplorer.org.Playlist[ id=" + id + " ]";
+        return "com.musicexplorer.org.entity.Playlist[ id=" + id + " ]";
     }
 
-   @Override
-   @PrePersist
-    public void SetCreatedDate() {
-        this.created = new Date();
+    @Override
+    @PrePersist
+    public void SetCreated() {
+        created = new Date();
     }
 
     @Override
     @PreUpdate
-    public void SetUpdatedDate() {
-        this.updated = new Date();
+    public void SetUpdated() {
+        updated = new Date();
     }
-
-
 }

@@ -3,8 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
-package com.musicexplorer.model;
+package com.musicexplorer.org.entity;
 
 import com.musicexplorer.model.helper.DatePersistance;
 import java.io.Serializable;
@@ -17,8 +16,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -33,45 +30,50 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Babak Tamjidi  baboly@gmail.com
+ * @author Babak Tamjidi baboly@gmail.com
  */
 @Entity
-@Table(name = "share")
+@Table(name = "artist")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Share.findAll", query = "SELECT s FROM Share s"),
-    @NamedQuery(name = "Share.findById", query = "SELECT s FROM Share s WHERE s.id = :id"),
-    @NamedQuery(name = "Share.findByDate", query = "SELECT s FROM Share s WHERE s.date = :date"),
-    @NamedQuery(name = "Share.findByNote", query = "SELECT s FROM Share s WHERE s.note = :note")})
-public class Share implements DatePersistance, Serializable {
+    @NamedQuery(name = "Artist.findAll", query = "SELECT a FROM Artist a"),
+    @NamedQuery(name = "Artist.findById", query = "SELECT a FROM Artist a WHERE a.id = :id"),
+    @NamedQuery(name = "Artist.findByName", query = "SELECT a FROM Artist a WHERE a.name = :name"),
+    @NamedQuery(name = "Artist.findByHistory", query = "SELECT a FROM Artist a WHERE a.history = :history"),
+    @NamedQuery(name = "Artist.findByGenrer", query = "SELECT a FROM Artist a WHERE a.genrer = :genrer"),
+    @NamedQuery(name = "Artist.findByCreated", query = "SELECT a FROM Artist a WHERE a.created = :created")})
+public class Artist implements DatePersistance, Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @Column(name = "date")
-    @Temporal(TemporalType.DATE)
-    private Date date;
+    @Size(max = 45)
+    @Column(name = "name")
+    private String name;
     @Size(max = 255)
-    @Column(name = "note")
-    private String note;
+    @Column(name = "history")
+    private String history;
+    @Size(max = 45)
+    @Column(name = "genrer")
+    private String genrer;
     @Column(name = "created")
     @Temporal(TemporalType.DATE)
     private Date created;
     @Column(name = "updated")
     @Temporal(TemporalType.DATE)
     private Date updated;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "shareId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "artist")
     private Collection<Song> songCollection;
-    @JoinColumn(name = "playlistId", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private Playlist playlistId;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "artistid")
+    private Collection<Follower> followerCollection;
 
-    public Share() {
+    public Artist() {
     }
 
-    public Share(Integer id) {
+    public Artist(Integer id) {
         this.id = id;
     }
 
@@ -83,20 +85,20 @@ public class Share implements DatePersistance, Serializable {
         this.id = id;
     }
 
-    public Date getDate() {
-        return date;
+    public String getName() {
+        return name;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getNote() {
-        return note;
+    public String getHistory() {
+        return history;
     }
 
-    public void setNote(String note) {
-        this.note = note;
+    public void setHistory(String history) {
+        this.history = history;
     }
 
     public Date getCreated() {
@@ -105,6 +107,18 @@ public class Share implements DatePersistance, Serializable {
 
     public Date getUpdated() {
         return updated;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    public String getGenrer() {
+        return genrer;
+    }
+
+    public void setGenrer(String genrer) {
+        this.genrer = genrer;
     }
 
     @XmlTransient
@@ -116,12 +130,13 @@ public class Share implements DatePersistance, Serializable {
         this.songCollection = songCollection;
     }
 
-    public Playlist getPlaylistid() {
-        return playlistId;
+    @XmlTransient
+    public Collection<Follower> getFollowerCollection() {
+        return followerCollection;
     }
 
-    public void setPlaylistid(Playlist playlistid) {
-        this.playlistId = playlistid;
+    public void setFollowerCollection(Collection<Follower> followerCollection) {
+        this.followerCollection = followerCollection;
     }
 
     @Override
@@ -134,10 +149,10 @@ public class Share implements DatePersistance, Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Share)) {
+        if (!(object instanceof Artist)) {
             return false;
         }
-        Share other = (Share) object;
+        Artist other = (Artist) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -146,20 +161,19 @@ public class Share implements DatePersistance, Serializable {
 
     @Override
     public String toString() {
-        return "com.musicexplorer.org.Share[ id=" + id + " ]";
+        return "com.musicexplorer.org.entity.Artist[ id=" + id + " ]";
     }
 
-   @Override
-   @PrePersist
-    public void SetCreatedDate() {
-        this.created = new Date();
+    @Override
+    @PrePersist
+    public void SetCreated() {
+        created = new Date();
     }
 
     @Override
     @PreUpdate
-    public void SetUpdatedDate() {
-        this.updated = new Date();
+    public void SetUpdated() {
+        updated = new Date();
     }
-
 
 }

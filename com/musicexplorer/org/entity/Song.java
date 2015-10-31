@@ -3,22 +3,26 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.musicexplorer.model;
+package com.musicexplorer.org.entity;
 
 import com.musicexplorer.model.helper.DatePersistance;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Objects;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -26,6 +30,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -36,13 +41,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Song.findAll", query = "SELECT s FROM Song s"),
-    @NamedQuery(name = "Song.findByIdSong", query = "SELECT s FROM Song s WHERE s.id  = :id"),
+    @NamedQuery(name = "Song.findById", query = "SELECT s FROM Song s WHERE s.id = :id"),
     @NamedQuery(name = "Song.findByTitle", query = "SELECT s FROM Song s WHERE s.title = :title"),
     @NamedQuery(name = "Song.findByDuration", query = "SELECT s FROM Song s WHERE s.duration = :duration"),
-    @NamedQuery(name = "Song.findByGenrer", query = "SELECT s FROM Song s WHERE s.genrer = :genrer"),
     @NamedQuery(name = "Song.findByCreated", query = "SELECT s FROM Song s WHERE s.created = :created"),
-    @NamedQuery(name = "Song.findByArtistid", query = "SELECT s FROM Song s WHERE s.artistId = :artistId")})
-public class Song implements DatePersistance, Serializable {
+    @NamedQuery(name = "Song.findByArtist", query = "SELECT s FROM Song s WHERE s.artist = :artist")})
+public class Song implements DatePersistance , Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -55,28 +59,30 @@ public class Song implements DatePersistance, Serializable {
     private String title;
     @Column(name = "duration")
     private Integer duration;
-    @Size(max = 45)
-    @Column(name = "genrer")
-    private String genrer;
     @Column(name = "created")
     @Temporal(TemporalType.DATE)
     private Date created;
     @Column(name = "updated")
     @Temporal(TemporalType.DATE)
     private Date updated;
-    @JoinColumn(name = "artistId", referencedColumnName = "id")
+    @ManyToMany(mappedBy = "songCollection")
+    private Collection<Playlist> playlistCollection;
+    @JoinColumn(name = "artistId", referencedColumnName = "id", updatable = false)
     @ManyToOne(optional = false)
-    private Artist artistId;
-    @JoinColumn(name = "playlistId", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private Playlist playlistId;
-    @JoinColumn(name = "shareId", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private Share shareId;
+    private Artist artist;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "song")
+    private Collection<Share> shareCollection;
 
     public Song() {
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
     public String getTitle() {
         return title;
     }
@@ -93,46 +99,6 @@ public class Song implements DatePersistance, Serializable {
         this.duration = duration;
     }
 
-    public String getGenrer() {
-        return genrer;
-    }
-
-    public void setGenrer(String genrer) {
-        this.genrer = genrer;
-    }
-
-    public Artist getArtist() {
-        return artistId;
-    }
-
-    public void setArtist(Artist artist) {
-        this.artistId = artist;
-    }
-
-    public Playlist getPlaylistid() {
-        return playlistId;
-    }
-
-    public void setPlaylistid(Playlist playlistid) {
-        this.playlistId = playlistid;
-    }
-
-    public Share getShareid() {
-        return shareId;
-    }
-
-    public void setShareid(Share shareid) {
-        this.shareId = shareid;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
     public Date getCreated() {
         return created;
     }
@@ -141,21 +107,49 @@ public class Song implements DatePersistance, Serializable {
         return updated;
     }
 
+    @XmlTransient
+    public Collection<Playlist> getPlaylistCollection() {
+        return playlistCollection;
+    }
+
+    public void setPlaylistCollection(Collection<Playlist> playlistCollection) {
+        this.playlistCollection = playlistCollection;
+    }
+
+    public Artist getArtist() {
+        return artist;
+    }
+
+    public void setArtist(Artist artist) {
+        this.artist = artist;
+    }
+
+    @XmlTransient
+    public Collection<Share> getShareCollection() {
+        return shareCollection;
+    }
+
+    public void setShareCollection(Collection<Share> shareCollection) {
+        this.shareCollection = shareCollection;
+    }
+
     @Override
     public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        int hash = 7;
+        hash = 97 * hash + Objects.hashCode(this.id);
         return hash;
     }
-    
+
     @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Song)) {
+    public boolean equals(Object obj) {
+        if (obj == null) {
             return false;
         }
-        Song other = (Song) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Song other = (Song) obj;
+        if (!Objects.equals(this.id, other.id)) {
             return false;
         }
         return true;
@@ -163,20 +157,23 @@ public class Song implements DatePersistance, Serializable {
 
     @Override
     public String toString() {
-        return "Song{" + "id=" + id + ", title=" + title + ", duration=" + duration + ", genrer=" + genrer + ", created=" + created + ", artist=" + artistId + ", playlistid=" + playlistId + ", shareid=" + shareId + '}';
+        return "Song{" + "id=" + id + ", title=" + title + ", duration=" + duration + ", created=" + created + ", updated=" + updated + ", playlistCollection=" + playlistCollection + ", artist=" + artist + ", shareCollection=" + shareCollection + '}';
     }
 
-   @Override
-   @PrePersist
-    public void SetCreatedDate() {
-        this.created = new Date();
+ 
+
+    @Override
+    @PrePersist
+    public void SetCreated() {
+        created = new Date();
     }
 
     @Override
     @PreUpdate
-    public void SetUpdatedDate() {
-        this.updated = new Date();
+    public void SetUpdated() {
+        updated = new Date();
     }
+    
 
 
 }

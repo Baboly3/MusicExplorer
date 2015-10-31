@@ -3,8 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
-package com.musicexplorer.model;
+package com.musicexplorer.org.entity;
 
 import com.musicexplorer.model.helper.DatePersistance;
 import java.io.Serializable;
@@ -31,7 +30,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Babak Tamjidi  baboly@gmail.com
+ * @author Babak Tamjidi baboly@gmail.com
  */
 @Entity
 @Table(name = "profile")
@@ -43,6 +42,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Profile.findByLastName", query = "SELECT p FROM Profile p WHERE p.lastName = :lastName"),
     @NamedQuery(name = "Profile.findByPassword", query = "SELECT p FROM Profile p WHERE p.password = :password")})
 public class Profile implements DatePersistance, Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -64,7 +64,9 @@ public class Profile implements DatePersistance, Serializable {
     @Column(name = "updated")
     @Temporal(TemporalType.DATE)
     private Date updated;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "profileId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "profileid")
+    private Collection<Follower> followerCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "profileid")
     private Collection<Playlist> playlistCollection;
 
     public Profile() {
@@ -116,6 +118,15 @@ public class Profile implements DatePersistance, Serializable {
     
 
     @XmlTransient
+    public Collection<Follower> getFollowerCollection() {
+        return followerCollection;
+    }
+
+    public void setFollowerCollection(Collection<Follower> followerCollection) {
+        this.followerCollection = followerCollection;
+    }
+
+    @XmlTransient
     public Collection<Playlist> getPlaylistCollection() {
         return playlistCollection;
     }
@@ -146,19 +157,19 @@ public class Profile implements DatePersistance, Serializable {
 
     @Override
     public String toString() {
-        return "com.musicexplorer.org.Profile[ id=" + id + " ]";
+        return "com.musicexplorer.org.entity.Profile[ id=" + id + " ]";
     }
 
-   @Override
-   @PrePersist
-    public void SetCreatedDate() {
-        this.created = new Date();
+    @Override
+    @PrePersist
+    public void SetCreated() {
+        created = new Date();
     }
 
     @Override
     @PreUpdate
-    public void SetUpdatedDate() {
-        this.updated = new Date();
+    public void SetUpdated() {
+        updated = new Date();
     }
 
 }

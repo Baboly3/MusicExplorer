@@ -6,7 +6,7 @@
 
 package com.musicexplorer.org.ejb;
 
-import com.musicexplorer.model.Song;
+import com.musicexplorer.org.entity.Song;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -32,7 +32,5 @@ public class SongFacade extends AbstractFacade<Song> {
     public EntityManager getEm() {
         return em;
     }
-    
-    
 
 }

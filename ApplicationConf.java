@@ -4,16 +4,17 @@
  * and open the template in the editor.
  */
 
-
-
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 /**
  *
- * @author Babak Tamjidi  baboly@gmail.com
+ * @author Babak Tamjidi baboly@gmail.com
  */
 @ApplicationPath("api")
-public class ApplicationConf extends Application{
+public class ApplicationConf extends Application {
+
+    
+    
 
 }

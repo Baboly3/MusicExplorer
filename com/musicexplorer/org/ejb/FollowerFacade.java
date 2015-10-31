@@ -6,7 +6,7 @@
 
 package com.musicexplorer.org.ejb;
 
-import com.musicexplorer.model.Follower;
+import com.musicexplorer.org.entity.Follower;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -28,5 +28,11 @@ public class FollowerFacade extends AbstractFacade<Follower> {
     public FollowerFacade() {
         super(Follower.class);
     }
+
+    public EntityManager getEm() {
+        return em;
+    }
+    
+    
 
 }
