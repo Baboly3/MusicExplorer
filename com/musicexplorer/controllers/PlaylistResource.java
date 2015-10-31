@@ -69,15 +69,15 @@ public class PlaylistResource {
     }
 
     @GET
-    @Path("{pid}/")
-    public Collection<Song> getPlaylist(@PathParam("pid") int id) {
+    @Path("{playlistId}/")
+    public Collection<Song> getPlaylist(@PathParam("playlistId") int id) {
         Playlist playlist = playlistManager.find(id);
         Collection<Song> songs = playlist.getSongCollection();
         return songs;
     }
 
     @GET
-    public Response getPlaylistsById(@Context UriInfo uriInfo, @PathParam("id") int id) {
+    public Response getPlaylistsById(@Context UriInfo uriInfo, @PathParam("artistId") int id) {
         Query query = playlistManager.getEm().createNamedQuery("Playlist.findByProfileId", Playlist.class);
         query.setParameter("profileid", profileManager.find(id));
         List<Playlist> list = query.getResultList();
@@ -93,7 +93,7 @@ public class PlaylistResource {
                     path(Integer.toString(pl.getEntity().getId())).
                     build().toString();
             pl.setLink(new Link(uri, "User playlist"));
-            if(playlists.size() == size){
+            if (playlists.size() == size) {
                 pl.setLink(new Link(uri2, "All playlists"));
             }
         }
@@ -117,23 +117,23 @@ public class PlaylistResource {
         return Response.status(Status.OK).entity(playlists).build();
     }
 
-    @GET
-    @Path("{pid}/{songid}/")
-    public Song getSongInPlaylist(@PathParam("songid") int songid) {
-        return songManager.find(songid);
-    }
+//    @GET
+//    @Path("{playlistId}/{songid}/")
+//    public Song getSongInPlaylist(@PathParam("songid") int songid) {
+//        return songManager.find(songid);
+//    }
 
     @POST
-    public Playlist addPlaylist(Playlist playlist, @PathParam("id") int id) {
+    public Playlist addPlaylist(Playlist playlist, @PathParam("artistId") int id) {
         if (profileManager.find(id) != null) {
             playlist.setProfileid(profileManager.find(id));
         }
         List<Song> so = new ArrayList<>();
         Collection<Song> songs = playlist.getSongCollection();
-        if(songs != null){
-        for (Song s : songs) {
-            so.add(songManager.find(s.getId()));
-        }
+        if (songs != null) {
+            for (Song s : songs) {
+                so.add(songManager.find(s.getId()));
+            }
         }
         playlist.setSongCollection(so);
         playlistManager.create(playlist);
@@ -141,8 +141,8 @@ public class PlaylistResource {
     }
 
     @PUT
-    @Path("{pid}")
-    public String addSongsToPlaylist(Playlist playlist, @PathParam("pid") int pid) {
+    @Path("{playlistId}")
+    public String addSongsToPlaylist(Playlist playlist, @PathParam("playlistId") int pid) {
         Playlist mPlaylist = new Playlist();
 
         if (playlistManager.find(pid) != null) {
@@ -159,10 +159,15 @@ public class PlaylistResource {
     }
 
     @DELETE
-    @Path("{pid}")
-    public void delPlaylist(@PathParam("pid") int id) {
+    @Path("{playlistId}")
+    public void delPlaylist(@PathParam("playlistId") int id) {
         if (playlistManager.find(id) != null) {
             playlistManager.remove(playlistManager.find(id));
         }
+    }
+
+    @Path("{playlistId}/songs/")
+    public SongResource getSongs() {
+        return new SongResource();
     }
 }

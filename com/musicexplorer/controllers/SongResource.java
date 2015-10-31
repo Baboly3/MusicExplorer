@@ -60,39 +60,52 @@ public class SongResource {
     }
 
     @GET
-    public Response getSongs(@Context UriInfo uriInfo, @PathParam("artistId") int artistId) {
+    public Response getSongs(@Context UriInfo uriInfo, @PathParam("artistId") int aId, @PathParam("playlistId") int pId) {
+        System.out.println("artistid " + aId + "/nplaylistId " + pId);
+        List<Song> list = new ArrayList<Song>();
+        List<GenericLinkWrapper> songLinkList = new ArrayList<GenericLinkWrapper>();
+        this.uriInfo = uriInfo;
+        if (aId != 0) {
 
-        if (artistId != 0) {
-            List<Song> list = new ArrayList<Song>();
+            list = sm.getSongsByArtist(aId);
+            songLinkList = genericLWF.getById(list);
+            
 
-            List<GenericLinkWrapper> songLinkList = genericLWF.getById(list);
-            this.uriInfo = uriInfo;
-            String uri2 = uriInfo.getBaseUriBuilder().path(ProfileResource.class).path("playlists").build().toString();
-            int size = 0;
-            for (GenericLinkWrapper<Song> pl : songLinkList) {
-                size++;
-                System.out.println("Size :" + size);
+            for (GenericLinkWrapper<Song> artistSonglist : songLinkList) {
                 String uri = this.uriInfo.getBaseUriBuilder().
                         path(SongResource.class).
-                        path(Integer.toString(pl.getEntity().getId())).path("Songs").
+                        path(Integer.toString(artistSonglist.getEntity().getId())).
                         build().toString();
-                pl.setLink(new Link(uri, "Artist Song"));
-                return
+                artistSonglist.setLink(new Link(uri, "Artist Song"));
             }
-        
-            this.uriInfo = uriInfo;
-            Song song = new Song();
-            List<GenericLinkWrapper> songList = genericLWF.getAll(song);
-
-            for (GenericLinkWrapper<Song> gl : songList) {
+            return Response.ok().entity(songLinkList).build();
+        }
+        if (pId != 0) {
+            list = sm.getSongsByPlaylist(pId);
+            songLinkList = genericLWF.getById(list);
+            for (GenericLinkWrapper<Song> playlistSongList : songLinkList) {
                 String uri = this.uriInfo.getBaseUriBuilder().
                         path(SongResource.class).
-                        path(Integer.toString(gl.getEntity().getId()))
-                        .build().toString();
-                gl.setLink(new Link(uri, "songs"));
+                        path(Integer.toString(playlistSongList.getEntity().getId())).
+                        build().toString();
+                playlistSongList.setLink(new Link(uri, "Artist Song"));
+
             }
-            return Response.status(Status.OK).entity(songList).build();
+
+            return Response.ok().entity(songLinkList).build();
         }
+        this.uriInfo = uriInfo;
+        Song song = new Song();
+        List<GenericLinkWrapper> songList = genericLWF.getAll(song);
+
+        for (GenericLinkWrapper<Song> gl : songList) {
+            String uri = this.uriInfo.getBaseUriBuilder().
+                    path(SongResource.class).
+                    path(Integer.toString(gl.getEntity().getId()))
+                    .build().toString();
+            gl.setLink(new Link(uri, "songs"));
+        }
+        return Response.status(Status.OK).entity(songList).build();
     }
 
     @GET
