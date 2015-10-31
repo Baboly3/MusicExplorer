@@ -11,6 +11,7 @@ import com.musicexplorer.org.entity.Song;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapper;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapperFactory;
 import com.musicexplorer.org.utils.Link;
+import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.naming.InitialContext;
@@ -18,6 +19,7 @@ import javax.naming.NamingException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -58,7 +60,7 @@ public class SongResource {
     }
     
     @GET
-    public Response getArtists(@Context UriInfo uriInfo) {
+    public Response getSongs(@Context UriInfo uriInfo) {
         this.uriInfo = uriInfo;
         Song song = new Song();
         List<GenericLinkWrapper> songList = genericLWF.getAll(song);
@@ -73,13 +75,28 @@ public class SongResource {
         return Response.status(Status.OK).entity(songList).build();
     }
 
+ 
 
-//
-//    @GET
-//    @Path("{songId}/")
-//    public Song getSong(@PathParam("songId") int id) {
-//        return sm.find(id);
-//    }
+    @GET
+    @Path("{songId}/")
+    public Response getSong(@Context UriInfo uriInfo, @PathParam("songId") int id) {
+        List<Song> list = new ArrayList<Song>();
+        list.add(sm.find(id));
+        List<GenericLinkWrapper> songLinkList = genericLWF.getById(list);
+        this.uriInfo = uriInfo;
+        String uri2 = uriInfo.getBaseUriBuilder().path(ProfileResource.class).path("playlists").build().toString();
+        int size = 0;
+        for (GenericLinkWrapper<Song> pl : songLinkList) {
+            size++;
+            System.out.println("Size :" + size);
+            String uri = this.uriInfo.getBaseUriBuilder().
+                    path(SongResource.class).
+                    path(Integer.toString(pl.getEntity().getId())).path("Songs").
+                    build().toString();
+            pl.setLink(new Link(uri, "Artist Song"));
+        }
+        return Response.status(Status.OK).entity(songLinkList).build();
+    }
 //
 //    @POST
 //    public Song addSong(Song song, @PathParam("id") int id) {
