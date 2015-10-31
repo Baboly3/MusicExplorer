@@ -7,22 +7,22 @@ package com.musicexplorer.controllers;
 
 import com.musicexplorer.org.ejb.ArtistFacade;
 import com.musicexplorer.org.ejb.SongFacade;
-import com.musicexplorer.org.entity.Artist;
 import com.musicexplorer.org.entity.Song;
+import com.musicexplorer.org.entitywrappers.GenericLinkWrapper;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapperFactory;
+import com.musicexplorer.org.utils.Link;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.persistence.Query;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 /**
@@ -58,35 +58,22 @@ public class SongResource {
     }
     
     @GET
-    public String getText(){
-        return "test";
+    public Response getArtists(@Context UriInfo uriInfo) {
+        this.uriInfo = uriInfo;
+        Song song = new Song();
+        List<GenericLinkWrapper> songList = genericLWF.getAll(song);
+
+        for (GenericLinkWrapper<Song> gl : songList) {
+            String uri = this.uriInfo.getBaseUriBuilder().
+                    path(SongResource.class).
+                    path(Integer.toString(gl.getEntity().getId()))
+                    .build().toString();
+            gl.setLink(new Link(uri, "songs"));
+        }
+        return Response.status(Status.OK).entity(songList).build();
     }
 
-//    @GET
-//    public Response getArtists(@Context UriInfo uriInfo) {
-//        this.uriInfo = uriInfo;
-//        Song song = new Song();
-//        List<GenericLinkWrapper> songList = getAll(song);
-//
-//        for (GenericLinkWrapper<Song> gl : songList) {
-//            String uri = this.uriInfo.getBaseUriBuilder().
-//                    path(SongResource.class).
-//                    path(Integer.toString(gl.getEntity().getId()))
-//                    .build().toString();
-//            gl.setLink(new Link(uri, "songs"));
-//        }
-//        return Response.status(Status.OK).entity(songList).build();
-//
-//    }
-//    @GET
-//    @Path("all")
-//    public List<Song> getSongs() {
-//        return sm.findAll();
-//    }
-//    @GET
-//    public String getSongs() {
-//        return "works fine";
-//    }
+
 //
 //    @GET
 //    @Path("{songId}/")

@@ -85,19 +85,21 @@ public class ProfileResource{
     }
 
     @POST
-    public Profile addProfile(Profile profile) {
+    public Response addProfile(Profile profile) {
         Profile mProfile = new Profile();
         mProfile = profile;
-        pm.create(mProfile);
-        return profile;
+        pm.create(mProfile);   
+        return Response.ok().entity(mProfile).build();
     }
 
     @DELETE
     @Path("{id}")
-    public void delProfile(@PathParam("id") int id) {
+    public Response delProfile(@PathParam("id") int id) {
         if (pm.find(id) != null) {
             pm.remove(pm.find(id));
+            return Response.ok().build();
         }
+        return Response.status(Status.BAD_REQUEST).build();
     }
 
     @PUT
