@@ -45,8 +45,8 @@ public class ProfileResource{
     UriInfo uriInfo;
 
     @GET
-    @Path("{id}/")
-    public Response getProfile(@Context UriInfo uriInfo, @PathParam("id") int id) {
+    @Path("{profileId}/")
+    public Response getProfile(@Context UriInfo uriInfo, @PathParam("profileId") int id) {
 
         List<Profile> list = new ArrayList<Profile>();
         list.add(pm.find(id));
@@ -93,8 +93,8 @@ public class ProfileResource{
     }
 
     @DELETE
-    @Path("{id}")
-    public Response delProfile(@PathParam("id") int id) {
+    @Path("{profileId}")
+    public Response delProfile(@PathParam("profileId") int id) {
         if (pm.find(id) != null) {
             pm.remove(pm.find(id));
             return Response.ok().build();
@@ -103,8 +103,8 @@ public class ProfileResource{
     }
 
     @PUT
-    @Path("{id}")
-    public Response editProfile(Profile profile, @PathParam("id") int id) {
+    @Path("{profileId}")
+    public Response editProfile(Profile profile, @PathParam("profileId") int id) {
         profile.setId(id);
         if (pm.find(id) != null) {
             pm.edit(profile);
@@ -114,7 +114,7 @@ public class ProfileResource{
         }
     }
 
-    @Path("{id}/playlists/")
+    @Path("{profileId}/playlists/")
     public PlaylistResource getPlaylists() {
         return new PlaylistResource();
     }

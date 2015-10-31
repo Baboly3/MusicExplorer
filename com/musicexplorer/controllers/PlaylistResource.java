@@ -46,10 +46,6 @@ public class PlaylistResource {
     @EJB
     PlaylistFacade playlistManager;
     @EJB
-    ProfileFacade profileManager;
-    @EJB
-    SongFacade songManager;
-    @EJB
     GenericLinkWrapperFactory<Playlist> genericLWF;
 
     @Context
@@ -59,10 +55,8 @@ public class PlaylistResource {
         try {
             String lookupName = "java:module/PlaylistFacade";
             String lookupName2 = "java:module/GenericLinkWrapperFactory";
-            String lookupName3 = "java:module/ProfileFacade";
             playlistManager = (PlaylistFacade) InitialContext.doLookup(lookupName);
             genericLWF = (GenericLinkWrapperFactory) InitialContext.doLookup(lookupName2);
-            profileManager = (ProfileFacade) InitialContext.doLookup(lookupName3);
         } catch (NamingException e) {
             System.out.println("EXCEPTION MESSAGE:::" + e.getMessage());
         }
@@ -72,38 +66,28 @@ public class PlaylistResource {
     @Path("{playlistId}/")
     public Collection<Song> getPlaylist(@PathParam("playlistId") int id) {
         Playlist playlist = playlistManager.find(id);
-        Collection<Song> songs = playlist.getSongCollection();
+        List<Song> songs = playlist.getSongCollection();
+        
+        
         return songs;
     }
 
     @GET
-    public Response getPlaylistsById(@Context UriInfo uriInfo, @PathParam("artistId") int id) {
-        Query query = playlistManager.getEm().createNamedQuery("Playlist.findByProfileId", Playlist.class);
-        query.setParameter("profileid", profileManager.find(id));
-        List<Playlist> list = query.getResultList();
+    public Response getPlaylists(@Context UriInfo uriInfo, @PathParam("profileId") int profileId) {
+        
+        if(profileId != 0){        
+        List<Playlist> list = playlistManager.getPlaylistByProfileId(profileId);
         List<GenericLinkWrapper> playlists = genericLWF.getById(list);
         this.uriInfo = uriInfo;
-        String uri2 = uriInfo.getBaseUriBuilder().path(PlaylistResource.class).path("all").build().toString();
-        int size = 0;
         for (GenericLinkWrapper<Playlist> pl : playlists) {
-            size++;
-            System.out.println("Size :" + size);
             String uri = this.uriInfo.getBaseUriBuilder().
                     path(PlaylistResource.class).
                     path(Integer.toString(pl.getEntity().getId())).
                     build().toString();
             pl.setLink(new Link(uri, "User playlist"));
-            if (playlists.size() == size) {
-                pl.setLink(new Link(uri2, "All playlists"));
-            }
         }
         return Response.status(Status.OK).entity(playlists).build();
     }
-
-    @GET
-    @Path("all")
-    public Response getPlaylists(@Context UriInfo uriInfo) {
-        this.uriInfo = uriInfo;
         Playlist playlist = new Playlist();
         List<GenericLinkWrapper> playlists = genericLWF.getAll(playlist);
 
@@ -117,6 +101,7 @@ public class PlaylistResource {
         return Response.status(Status.OK).entity(playlists).build();
     }
 
+
 //    @GET
 //    @Path("{playlistId}/{songid}/")
 //    public Song getSongInPlaylist(@PathParam("songid") int songid) {
@@ -124,15 +109,15 @@ public class PlaylistResource {
 //    }
 
     @POST
-    public Playlist addPlaylist(Playlist playlist, @PathParam("artistId") int id) {
-        if (profileManager.find(id) != null) {
-            playlist.setProfileid(profileManager.find(id));
+    public Playlist addPlaylist(Playlist playlist, @PathParam("profileId") int id) {
+        if (playlistManager.getProfile(id) != null) {
+            playlist.setProfileid(playlistManager.getProfile(id));
         }
         List<Song> so = new ArrayList<>();
         Collection<Song> songs = playlist.getSongCollection();
         if (songs != null) {
             for (Song s : songs) {
-                so.add(songManager.find(s.getId()));
+                so.add(playlistManager.getSong(s.getId()));
             }
         }
         playlist.setSongCollection(so);
@@ -148,10 +133,10 @@ public class PlaylistResource {
         if (playlistManager.find(pid) != null) {
             mPlaylist = playlistManager.find(pid);
         }
-        Collection<Song> updatedPlaylist = mPlaylist.getSongCollection();
-        Collection<Song> songs = playlist.getSongCollection();
+        List<Song> updatedPlaylist = mPlaylist.getSongCollection();
+        List<Song> songs = playlist.getSongCollection();
         for (Song s : songs) {
-            updatedPlaylist.add(songManager.find(s.getId()));
+            updatedPlaylist.add(playlistManager.getSong(s.getId()));
         }
         mPlaylist.setSongCollection(updatedPlaylist);
         playlistManager.edit(mPlaylist);

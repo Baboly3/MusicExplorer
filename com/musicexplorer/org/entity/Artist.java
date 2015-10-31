@@ -7,8 +7,8 @@ package com.musicexplorer.org.entity;
 
 import com.musicexplorer.model.helper.DatePersistance;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -66,9 +66,9 @@ public class Artist implements DatePersistance, Serializable {
     @Temporal(TemporalType.DATE)
     private Date updated;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "artist")
-    private Collection<Song> songCollection;
+    private List<Song> songCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "artistid")
-    private Collection<Follower> followerCollection;
+    private List<Follower> followerCollection;
 
     public Artist() {
     }
@@ -122,20 +122,20 @@ public class Artist implements DatePersistance, Serializable {
     }
 
     @XmlTransient
-    public Collection<Song> getSongCollection() {
+    public List<Song> getSongCollection() {
         return songCollection;
     }
 
-    public void setSongCollection(Collection<Song> songCollection) {
+    public void setSongCollection(List<Song> songCollection) {
         this.songCollection = songCollection;
     }
 
     @XmlTransient
-    public Collection<Follower> getFollowerCollection() {
+    public List<Follower> getFollowerCollection() {
         return followerCollection;
     }
 
-    public void setFollowerCollection(Collection<Follower> followerCollection) {
+    public void setFollowerCollection(List<Follower> followerCollection) {
         this.followerCollection = followerCollection;
     }
 

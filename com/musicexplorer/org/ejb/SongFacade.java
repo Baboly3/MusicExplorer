@@ -51,13 +51,8 @@ public class SongFacade extends AbstractFacade<Song> {
     
     public List<Song> getSongsByPlaylist(int id){
         Query query = em.createNamedQuery("Song.findByPlaylistId", Playlist.class);
-        query.setParameter("playlistCollection", getPlaylist(id));
+        query.setParameter("playlistCollection", em.find(Playlist.class, id));
         List<Song> PlaylistSongList = (List<Song>) query.getResultList();
         return PlaylistSongList;
     }
-    public Playlist getPlaylist(int id){
-        Playlist playlist = em.find(Playlist.class, id);
-        return playlist;
-    }
-
 }
