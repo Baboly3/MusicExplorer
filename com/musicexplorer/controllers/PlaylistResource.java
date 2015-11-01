@@ -64,30 +64,37 @@ public class PlaylistResource {
 
     @GET
     @Path("{playlistId}/")
-    public Collection<Song> getPlaylist(@PathParam("playlistId") int id) {
+    public Response getPlaylist(@Context UriInfo uriInfo, @PathParam("playlistId") int id) {
         Playlist playlist = playlistManager.find(id);
         List<Song> songs = playlist.getSongCollection();
+        GenericLinkWrapperFactory<Song> genericLWFSong = new GenericLinkWrapperFactory<>();
+        List<GenericLinkWrapper> playlistLinkSongs = genericLWFSong.getById(songs);
+        this.uriInfo = uriInfo;
+        for(GenericLinkWrapper<Song> songList : playlistLinkSongs){
+            String uri = this.uriInfo.getBaseUriBuilder().path(PlaylistResource.class).path(Integer.toString(id)).path("songs").path(Integer.toString(songList.getEntity().getId())).build().toString();
+            songList.setLink(new Link(uri, "Playlist song"));
+        }
         
-        
-        return songs;
+
+        return Response.ok().entity(playlistLinkSongs).build();
     }
 
     @GET
     public Response getPlaylists(@Context UriInfo uriInfo, @PathParam("profileId") int profileId) {
-        
-        if(profileId != 0){        
-        List<Playlist> list = playlistManager.getPlaylistByProfileId(profileId);
-        List<GenericLinkWrapper> playlists = genericLWF.getById(list);
-        this.uriInfo = uriInfo;
-        for (GenericLinkWrapper<Playlist> pl : playlists) {
-            String uri = this.uriInfo.getBaseUriBuilder().
-                    path(PlaylistResource.class).
-                    path(Integer.toString(pl.getEntity().getId())).
-                    build().toString();
-            pl.setLink(new Link(uri, "User playlist"));
+
+        if (profileId != 0) {
+            List<Playlist> list = playlistManager.getPlaylistByProfileId(profileId);
+            List<GenericLinkWrapper> playlists = genericLWF.getById(list);
+            this.uriInfo = uriInfo;
+            for (GenericLinkWrapper<Playlist> pl : playlists) {
+                String uri = this.uriInfo.getBaseUriBuilder().
+                        path(PlaylistResource.class).
+                        path(Integer.toString(pl.getEntity().getId())).
+                        build().toString();
+                pl.setLink(new Link(uri, "User playlist"));
+            }
+            return Response.status(Status.OK).entity(playlists).build();
         }
-        return Response.status(Status.OK).entity(playlists).build();
-    }
         Playlist playlist = new Playlist();
         List<GenericLinkWrapper> playlists = genericLWF.getAll(playlist);
 
@@ -101,15 +108,13 @@ public class PlaylistResource {
         return Response.status(Status.OK).entity(playlists).build();
     }
 
-
 //    @GET
 //    @Path("{playlistId}/{songid}/")
 //    public Song getSongInPlaylist(@PathParam("songid") int songid) {
 //        return songManager.find(songid);
 //    }
-
     @POST
-    public Playlist addPlaylist(Playlist playlist, @PathParam("profileId") int id) {
+    public Response addPlaylist(Playlist playlist, @PathParam("profileId") int id) {
         if (playlistManager.getProfile(id) != null) {
             playlist.setProfileid(playlistManager.getProfile(id));
         }
@@ -122,12 +127,12 @@ public class PlaylistResource {
         }
         playlist.setSongCollection(so);
         playlistManager.create(playlist);
-        return playlist;
+        return Response.ok().entity(playlist).build();
     }
 
     @PUT
     @Path("{playlistId}")
-    public String addSongsToPlaylist(Playlist playlist, @PathParam("playlistId") int pid) {
+    public Response addSongsToPlaylist(Playlist playlist, @PathParam("playlistId") int pid) {
         Playlist mPlaylist = new Playlist();
 
         if (playlistManager.find(pid) != null) {
@@ -140,15 +145,17 @@ public class PlaylistResource {
         }
         mPlaylist.setSongCollection(updatedPlaylist);
         playlistManager.edit(mPlaylist);
-        return "Updated";
+        return Response.ok().entity(mPlaylist).build();
     }
 
     @DELETE
     @Path("{playlistId}")
-    public void delPlaylist(@PathParam("playlistId") int id) {
+    public Response delPlaylist(@PathParam("playlistId") int id) {
         if (playlistManager.find(id) != null) {
             playlistManager.remove(playlistManager.find(id));
+            Response.ok().build();
         }
+        return Response.status(Status.NOT_FOUND).build();
     }
 
     @Path("{playlistId}/songs/")
