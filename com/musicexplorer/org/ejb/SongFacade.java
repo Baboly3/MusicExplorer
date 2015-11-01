@@ -51,8 +51,19 @@ public class SongFacade extends AbstractFacade<Song> {
     
     public List<Song> getSongsByPlaylist(int id){
         Query query = em.createNamedQuery("Song.findByPlaylistId", Playlist.class);
+        
         query.setParameter("playlistCollection", em.find(Playlist.class, id));
         List<Song> PlaylistSongList = (List<Song>) query.getResultList();
         return PlaylistSongList;
+    }
+    public boolean removeSongFromPlaylist(int songId, int playlistId){
+        System.out.println("in delete");
+        Query query = em.createNamedQuery("Playlist.findById", Playlist.class);
+        query.setParameter("id", playlistId);
+        Playlist playlist = (Playlist) query.getSingleResult();
+        boolean removed = playlist.getSongCollection().remove(em.find(Song.class, songId));
+//        query = em.createNamedQuery("Playlist.deleteSongFromPlaylist", Playlist.class);
+//        query.setParameter("songCollection", em.find(Song.class, songId));
+        return removed;
     }
 }

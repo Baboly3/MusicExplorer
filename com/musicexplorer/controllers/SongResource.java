@@ -8,6 +8,7 @@ package com.musicexplorer.controllers;
 import com.musicexplorer.org.ejb.ArtistFacade;
 import com.musicexplorer.org.ejb.SongFacade;
 import com.musicexplorer.org.entity.Song;
+import static com.musicexplorer.org.entity.Song_.id;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapper;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapperFactory;
 import com.musicexplorer.org.utils.Link;
@@ -17,6 +18,7 @@ import javax.ejb.EJB;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -140,13 +142,23 @@ public class SongResource {
 //        return mSong;
 //    }
 ////
-//    @DELETE
-//    @Path("{songId}")
-//    public void delSong(@PathParam("songId") int id) {
-//        if (sm.find(id) != null) {
-//            sm.remove(sm.find(id));
-//        }
-//    }
+    @DELETE
+    @Path("{songId}")
+    public Response delSong(@PathParam("songId") int songId, @PathParam("playlistId") int playlistId) {
+        System.out.println("playlistid " + playlistId + "\n songid " + songId);
+        if(playlistId != 0){
+            boolean removed = sm.removeSongFromPlaylist(songId, playlistId);
+            if(removed){
+            return Response.status(Status.OK).build();
+            }
+            return Response.status(Status.BAD_REQUEST).build();
+        }
+        if (sm.find(songId) != null && playlistId == 0) {
+            sm.remove(sm.find(id));
+            return Response.status(Status.NO_CONTENT).build();
+        }
+        return Response.status(Status.BAD_REQUEST).build();
+    }
 //
 //    @PUT
 //    @Path("{id}")

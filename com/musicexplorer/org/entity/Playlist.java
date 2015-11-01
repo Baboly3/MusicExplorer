@@ -45,6 +45,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Playlist.findAll", query = "SELECT p FROM Playlist p"),
     @NamedQuery(name = "Playlist.findById", query = "SELECT p FROM Playlist p WHERE p.id = :id"),
     @NamedQuery(name = "Playlist.findByProfileId", query = "SELECT p FROM Playlist p WHERE p.profileid = :profileid"),
+    @NamedQuery(name = "Playlist.deleteSongFromPlaylist", query = "DELETE FROM Playlist p WHERE p.songCollection = :songCollection"),
     @NamedQuery(name = "Playlist.findByCreated", query = "SELECT p FROM Playlist p WHERE p.created = :created")})
 public class Playlist implements DatePersistance, Serializable {
 

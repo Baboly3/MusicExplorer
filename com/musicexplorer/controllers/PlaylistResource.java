@@ -70,11 +70,14 @@ public class PlaylistResource {
         GenericLinkWrapperFactory<Song> genericLWFSong = new GenericLinkWrapperFactory<>();
         List<GenericLinkWrapper> playlistLinkSongs = genericLWFSong.getById(songs);
         this.uriInfo = uriInfo;
-        for(GenericLinkWrapper<Song> songList : playlistLinkSongs){
-            String uri = this.uriInfo.getBaseUriBuilder().path(PlaylistResource.class).path(Integer.toString(id)).path("songs").path(Integer.toString(songList.getEntity().getId())).build().toString();
+        for (GenericLinkWrapper<Song> songList : playlistLinkSongs) {
+            String uri = this.uriInfo.getBaseUriBuilder().path(PlaylistResource.class).
+                    path(Integer.toString(id)).
+                    path("songs").
+                    path(Integer.toString(songList.getEntity().getId())).
+                    build().toString();
             songList.setLink(new Link(uri, "Playlist song"));
         }
-        
 
         return Response.ok().entity(playlistLinkSongs).build();
     }
