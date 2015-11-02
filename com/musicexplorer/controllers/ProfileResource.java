@@ -105,8 +105,20 @@ public class ProfileResource{
     @PUT
     @Path("{profileId}")
     public Response editProfile(Profile profile, @PathParam("profileId") int id) {
-        profile.setId(id);
+        
         if (pm.find(id) != null) {
+            Profile mProfile = new Profile();
+            mProfile = pm.find(id);
+            profile.setId(id);
+            if(profile.getFirstName() == null){
+                profile.setFirstName(mProfile.getFirstName());                
+            }
+            if(profile.getLastName() == null){
+                profile.setLastName(mProfile.getLastName());
+            }
+            if(profile.getPassword() == null){
+                profile.setPassword(mProfile.getPassword());
+            }
             pm.edit(profile);
             return Response.ok().build();
         } else {

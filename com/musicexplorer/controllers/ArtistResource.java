@@ -104,8 +104,20 @@ public class ArtistResource {
     @PUT
     @Path("{artistId}")
     public Response editArtist(Artist artist, @PathParam("artistId") int id) {
-        artist.setId(id);
+        
         if (am.find(id) != null) {
+            Artist mArtist = new Artist();
+            mArtist = am.find(id);
+            artist.setId(id);
+        if(artist.getGenrer() == null){
+            artist.setGenrer(mArtist.getGenrer());
+        }    
+        if(artist.getHistory() == null){
+            artist.setHistory(mArtist.getHistory());
+        }
+        if(artist.getName() == null){
+            artist.setName(mArtist.getName());
+        }
             am.edit(artist);
             return Response.ok().build();
         } else {

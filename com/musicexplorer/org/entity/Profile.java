@@ -50,18 +50,18 @@ public class Profile implements DatePersistance, Serializable {
     @Column(name = "id")
     private Integer id;
     @Size(max = 45)
-    @Column(name = "firstName")
+    @Column(name = "firstName", nullable = false)
     private String firstName;
     @Size(max = 45)
-    @Column(name = "lastName")
+    @Column(name = "lastName", nullable = false)
     private String lastName;
     @Size(max = 45)
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     private String password;
-    @Column(name = "created")
+    @Column(name = "created", updatable = false, insertable = false)
     @Temporal(TemporalType.DATE)
     private Date created;
-    @Column(name = "updated")
+    @Column(name = "updated", updatable = false, insertable = false)
     @Temporal(TemporalType.DATE)
     private Date updated;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "profileid")

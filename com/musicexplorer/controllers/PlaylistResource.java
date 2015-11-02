@@ -6,8 +6,6 @@
 package com.musicexplorer.controllers;
 
 import com.musicexplorer.org.ejb.PlaylistFacade;
-import com.musicexplorer.org.ejb.ProfileFacade;
-import com.musicexplorer.org.ejb.SongFacade;
 import com.musicexplorer.org.entity.Playlist;
 import com.musicexplorer.org.entity.Song;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapper;
@@ -19,7 +17,6 @@ import java.util.List;
 import javax.ejb.EJB;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.persistence.Query;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -78,7 +75,6 @@ public class PlaylistResource {
                     build().toString();
             songList.setLink(new Link(uri, "Playlist song"));
         }
-
         return Response.ok().entity(playlistLinkSongs).build();
     }
 
@@ -140,6 +136,8 @@ public class PlaylistResource {
 
         if (playlistManager.find(pid) != null) {
             mPlaylist = playlistManager.find(pid);
+        if (playlist.getPlaylist() == null){
+            playlist.setPlaylist(mPlaylist.getPlaylist());
         }
         List<Song> updatedPlaylist = mPlaylist.getSongCollection();
         List<Song> songs = playlist.getSongCollection();
@@ -148,7 +146,10 @@ public class PlaylistResource {
         }
         mPlaylist.setSongCollection(updatedPlaylist);
         playlistManager.edit(mPlaylist);
-        return Response.ok().entity(mPlaylist).build();
+        
+        return Response.ok().entity(mPlaylist).build(); 
+    }
+        return Response.status(Status.BAD_REQUEST).build();
     }
 
     @DELETE

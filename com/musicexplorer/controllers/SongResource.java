@@ -5,8 +5,8 @@
  */
 package com.musicexplorer.controllers;
 
-import com.musicexplorer.org.ejb.ArtistFacade;
 import com.musicexplorer.org.ejb.SongFacade;
+import com.musicexplorer.org.entity.Artist;
 import com.musicexplorer.org.entity.Song;
 import static com.musicexplorer.org.entity.Song_.id;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapper;
@@ -20,6 +20,8 @@ import javax.naming.NamingException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -41,8 +43,6 @@ public class SongResource {
     @EJB
     SongFacade sm;
     @EJB
-    ArtistFacade am;
-    @EJB
     GenericLinkWrapperFactory<Song> genericLWF;
 
     @Context
@@ -52,10 +52,8 @@ public class SongResource {
         try {
             String lookupName = "java:module/SongFacade";
             String lookupName2 = "java:module/GenericLinkWrapperFactory";
-            String lookupName3 = "java:module/ArtistFacade";
             sm = (SongFacade) InitialContext.doLookup(lookupName);
             genericLWF = (GenericLinkWrapperFactory) InitialContext.doLookup(lookupName2);
-            am = (ArtistFacade) InitialContext.doLookup(lookupName3);
         } catch (NamingException e) {
             System.out.println("EXCEPTION MESSAGE:::" + e.getMessage());
         }
@@ -68,11 +66,8 @@ public class SongResource {
         List<GenericLinkWrapper> songLinkList = new ArrayList<GenericLinkWrapper>();
         this.uriInfo = uriInfo;
         if (aId != 0) {
-
             list = sm.getSongsByArtist(aId);
             songLinkList = genericLWF.getById(list);
-            
-
             for (GenericLinkWrapper<Song> artistSonglist : songLinkList) {
                 String uri = this.uriInfo.getBaseUriBuilder().
                         path(SongResource.class).
@@ -91,15 +86,12 @@ public class SongResource {
                         path(Integer.toString(playlistSongList.getEntity().getId())).
                         build().toString();
                 playlistSongList.setLink(new Link(uri, "Artist Song"));
-
             }
-
             return Response.ok().entity(songLinkList).build();
         }
         this.uriInfo = uriInfo;
         Song song = new Song();
         List<GenericLinkWrapper> songList = genericLWF.getAll(song);
-
         for (GenericLinkWrapper<Song> gl : songList) {
             String uri = this.uriInfo.getBaseUriBuilder().
                     path(SongResource.class).
@@ -111,45 +103,46 @@ public class SongResource {
     }
 
     @GET
-    @Path("{songId}/")
-    public Response getSong(@Context UriInfo uriInfo, @PathParam("songId") int id
-    ) {
-        List<Song> list = new ArrayList<Song>();
-        list.add(sm.find(id));
-        List<GenericLinkWrapper> songLinkList = genericLWF.getById(list);
-        this.uriInfo = uriInfo;
-        String uri2 = uriInfo.getBaseUriBuilder().path(ProfileResource.class).path("playlists").build().toString();
-        int size = 0;
-        for (GenericLinkWrapper<Song> pl : songLinkList) {
-            size++;
-            System.out.println("Size :" + size);
-            String uri = this.uriInfo.getBaseUriBuilder().
-                    path(SongResource.class).
-                    path(Integer.toString(pl.getEntity().getId())).path("Songs").
-                    build().toString();
-            pl.setLink(new Link(uri, "Artist Song"));
-        }
-        return Response.status(Status.OK).entity(songLinkList).build();
+    @Path("{songId}")
+    public Response getSong(@PathParam("songId") int id) {
+        Song song = sm.find(id);
+
+//        List<Song> list = new ArrayList<Song>();
+//        list.add(sm.find(id));
+//        List<GenericLinkWrapper> songLinkList = genericLWF.getById(list);
+//        this.uriInfo = uriInfo;
+//        String uri2 = uriInfo.getBaseUriBuilder().path(ProfileResource.class).path("playlists").build().toString();
+//        int size = 0;
+//        for (GenericLinkWrapper<Song> pl : songLinkList) {
+//            size++;
+//            System.out.println("Size :" + size);
+//            String uri = this.uriInfo.getBaseUriBuilder().
+//                    path(SongResource.class).
+//                    path(Integer.toString(pl.getEntity().getId())).
+//                    build().toString();
+//            pl.setLink(new Link(uri, "Artist Song"));
+//        }
+        return Response.status(Status.OK).entity(song).build();
     }
-//
-//    @POST
-//    public Song addSong(Song song, @PathParam("id") int id) {
-//        Song mSong = new Song();
-//        mSong = song;
-//        Artist artist = am.find(id);
-//        mSong.setArtist(artist);
-//        sm.create(mSong);
-//        return mSong;
-//    }
-////
+
+    @POST
+    public Response addSong(Song song, @PathParam("artistId") int id) {
+        Song mSong = new Song();
+        mSong = song;
+        Artist artist = sm.getArtist(id);
+        mSong.setArtist(artist);
+        sm.create(mSong);
+        return Response.ok().entity(mSong).build();
+    }
+
     @DELETE
     @Path("{songId}")
     public Response delSong(@PathParam("songId") int songId, @PathParam("playlistId") int playlistId) {
         System.out.println("playlistid " + playlistId + "\n songid " + songId);
-        if(playlistId != 0){
+        if (playlistId != 0) {
             boolean removed = sm.removeSongFromPlaylist(songId, playlistId);
-            if(removed){
-            return Response.status(Status.OK).build();
+            if (removed) {
+                return Response.status(Status.OK).build();
             }
             return Response.status(Status.BAD_REQUEST).build();
         }
@@ -159,52 +152,24 @@ public class SongResource {
         }
         return Response.status(Status.BAD_REQUEST).build();
     }
-//
-//    @PUT
-//    @Path("{id}")
-//    public Response editSong(Song song, @PathParam("id") int id) {
-//        song.setId(id);
-//        if (sm.find(id) != null) {
-//            sm.edit(song);
-//            return Response.ok().build();
-//        } else {
-//            return Response.status(Response.Status.NOT_FOUND).build();
-//        }
-//
-//    }
 
-    //    @GET
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @Path("{id}/songs/{songid}")
-//    public Song getArtistSong(@PathParam("id") int id, @PathParam("songid") int songId) {
-//        return sm.find(songId);
-//    }
-//    @GET
-//    public List<Song> getSong(@PathParam("id") int id) {
-//        Query query = sm.getEm().createNamedQuery("Song.findByArtist", Song.class);
-//        Artist artist = am.find(id);
-//        query.setParameter("artist", artist);
-//        List<Song> songs = query.getResultList();
-//        System.out.println("IN GET!!!");
-//        return songs;
-//    }
-    //    @POST
-//    @Path("{id}/songs")
-//    @Consumes(MediaType.APPLICATION_JSON)
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public Song addSongToArtist(Song song, @PathParam("id") int id) {
-//        Song mSong = new Song();
-//        mSong = song;
-//        Artist artist = am.find(id);
-//        mSong.setArtist(artist);
-//        sm.create(mSong);
-//        return mSong;
-//    }
-    //    @DELETE
-//    @Path("{id}/songs/{songId}")
-//    public void delArtistSong(@PathParam("songId") int songId) {
-//        if (am.find(songId) != null) {
-//            am.remove(am.find(songId));
-//        }
-//    }
+    @PUT
+    @Path("{songId}")
+    public Response editSong(Song song, @PathParam("songId") int songId) {
+        System.out.println("Song id: " + songId);
+        
+        if (sm.find(songId) != null) {
+            Song mSong = sm.find(songId);
+            song.setId(songId);
+            if (song.getTitle() == null) {
+                song.setTitle(mSong.getTitle());
+            }
+            if (song.getDuration() == null) {
+                song.setDuration(mSong.getDuration());
+            }
+            sm.edit(song);
+            return Response.ok().build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
+    }
 }

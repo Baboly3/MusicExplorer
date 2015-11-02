@@ -60,7 +60,7 @@ public class Song implements DatePersistance , Serializable {
     @Column(name = "title")
     private String title;
     @Column(name = "duration")
-    private Integer duration;
+    private Double duration;
     @Column(name = "created")
     @Temporal(TemporalType.DATE)
     private Date created;
@@ -69,7 +69,7 @@ public class Song implements DatePersistance , Serializable {
     private Date updated;
     @ManyToMany(mappedBy = "songCollection")
     private List<Playlist> playlistCollection;
-    @JoinColumn(name = "artistId", referencedColumnName = "id", updatable = false)
+    @JoinColumn(name = "artistId", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Artist artist;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "song")
@@ -93,11 +93,11 @@ public class Song implements DatePersistance , Serializable {
         this.title = title;
     }
 
-    public Integer getDuration() {
+    public Double getDuration() {
         return duration;
     }
 
-    public void setDuration(Integer duration) {
+    public void setDuration(Double duration) {
         this.duration = duration;
     }
 
