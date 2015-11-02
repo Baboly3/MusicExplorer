@@ -68,7 +68,7 @@ public class Playlist implements DatePersistance, Serializable {
     @JoinTable(name = "song_has_playlist", joinColumns = {
         @JoinColumn(name = "Playlist_id", referencedColumnName = "id")}, inverseJoinColumns = {
         @JoinColumn(name = "Song_id", referencedColumnName = "id"),
-        @JoinColumn(name = "Song_Artist_id", referencedColumnName = "id")})
+        @JoinColumn(name = "Song_Artist_id", referencedColumnName = "artistId")})
     @ManyToMany
     private List<Song> songCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "playlistid")

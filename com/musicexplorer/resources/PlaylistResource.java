@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.musicexplorer.controllers;
+package com.musicexplorer.resources;
 
-import com.musicexplorer.org.ejb.PlaylistFacade;
+import com.musicexplorer.interfaces.MainService;
 import com.musicexplorer.org.entity.Playlist;
 import com.musicexplorer.org.entity.Song;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapper;
@@ -41,7 +41,7 @@ import javax.ws.rs.core.UriInfo;
 public class PlaylistResource {
 
     @EJB
-    PlaylistFacade playlistManager;
+    MainService mainService;
     @EJB
     GenericLinkWrapperFactory<Playlist> genericLWF;
 
@@ -49,20 +49,28 @@ public class PlaylistResource {
     UriInfo uriInfo;
 
     public PlaylistResource() {
-        try {
-            String lookupName = "java:module/PlaylistFacade";
-            String lookupName2 = "java:module/GenericLinkWrapperFactory";
-            playlistManager = (PlaylistFacade) InitialContext.doLookup(lookupName);
-            genericLWF = (GenericLinkWrapperFactory) InitialContext.doLookup(lookupName2);
-        } catch (NamingException e) {
-            System.out.println("EXCEPTION MESSAGE:::" + e.getMessage());
-        }
+        try { 
+            String lookupName = "java:module/MainServiceFacade"; 
+            String lookupName2 = "java:module/GenericLinkWrapperFactory"; 
+             mainService = (MainService) InitialContext.doLookup(lookupName); 
+             genericLWF = (GenericLinkWrapperFactory) InitialContext.doLookup(lookupName2); 
+         } catch (NamingException e) { 
+             System.out.println("EXCEPTION MESSAGE:::" + e.getMessage()); 
+         } 
+     } 
+
+    
+
+    public PlaylistResource(MainService mainService, GenericLinkWrapperFactory genericLinkWrapperFactory) {
+        this.mainService = mainService;
+        this.genericLWF = genericLinkWrapperFactory;  
     }
 
     @GET
     @Path("{playlistId}/")
     public Response getPlaylist(@Context UriInfo uriInfo, @PathParam("playlistId") int id) {
-        Playlist playlist = playlistManager.find(id);
+        System.out.println("playlistID: " + id);
+        Playlist playlist = mainService.getPlaylistService().find(id);
         List<Song> songs = playlist.getSongCollection();
         GenericLinkWrapperFactory<Song> genericLWFSong = new GenericLinkWrapperFactory<>();
         List<GenericLinkWrapper> playlistLinkSongs = genericLWFSong.getById(songs);
@@ -80,9 +88,9 @@ public class PlaylistResource {
 
     @GET
     public Response getPlaylists(@Context UriInfo uriInfo, @PathParam("profileId") int profileId) {
-
+        System.out.println("profileID " + profileId);
         if (profileId != 0) {
-            List<Playlist> list = playlistManager.getPlaylistByProfileId(profileId);
+            List<Playlist> list = mainService.getPlaylistService().getPlaylistByProfileId(profileId); 
             List<GenericLinkWrapper> playlists = genericLWF.getById(list);
             this.uriInfo = uriInfo;
             for (GenericLinkWrapper<Playlist> pl : playlists) {
@@ -107,25 +115,20 @@ public class PlaylistResource {
         return Response.status(Status.OK).entity(playlists).build();
     }
 
-//    @GET
-//    @Path("{playlistId}/{songid}/")
-//    public Song getSongInPlaylist(@PathParam("songid") int songid) {
-//        return songManager.find(songid);
-//    }
     @POST
     public Response addPlaylist(Playlist playlist, @PathParam("profileId") int id) {
-        if (playlistManager.getProfile(id) != null) {
-            playlist.setProfileid(playlistManager.getProfile(id));
+        if (mainService.getPlaylistService().getProfile(id) != null) {
+            playlist.setProfileid(mainService.getPlaylistService().getProfile(id));
         }
         List<Song> so = new ArrayList<>();
         Collection<Song> songs = playlist.getSongCollection();
         if (songs != null) {
             for (Song s : songs) {
-                so.add(playlistManager.getSong(s.getId()));
+                so.add(mainService.getPlaylistService().getSong(s.getId()));
             }
         }
         playlist.setSongCollection(so);
-        playlistManager.create(playlist);
+        mainService.getPlaylistService().create(playlist);
         return Response.ok().entity(playlist).build();
     }
 
@@ -134,18 +137,18 @@ public class PlaylistResource {
     public Response addSongsToPlaylist(Playlist playlist, @PathParam("playlistId") int pid) {
         Playlist mPlaylist = new Playlist();
 
-        if (playlistManager.find(pid) != null) {
-            mPlaylist = playlistManager.find(pid);
+        if (mainService.getPlaylistService().find(pid) != null) {
+            mPlaylist = mainService.getPlaylistService().find(pid);
         if (playlist.getPlaylist() == null){
             playlist.setPlaylist(mPlaylist.getPlaylist());
         }
         List<Song> updatedPlaylist = mPlaylist.getSongCollection();
         List<Song> songs = playlist.getSongCollection();
         for (Song s : songs) {
-            updatedPlaylist.add(playlistManager.getSong(s.getId()));
+            updatedPlaylist.add(mainService.getPlaylistService().getSong(s.getId()));
         }
         mPlaylist.setSongCollection(updatedPlaylist);
-        playlistManager.edit(mPlaylist);
+        mainService.getPlaylistService().edit(mPlaylist);
         
         return Response.ok().entity(mPlaylist).build(); 
     }
@@ -155,8 +158,8 @@ public class PlaylistResource {
     @DELETE
     @Path("{playlistId}")
     public Response delPlaylist(@PathParam("playlistId") int id) {
-        if (playlistManager.find(id) != null) {
-            playlistManager.remove(playlistManager.find(id));
+        if (mainService.getPlaylistService().find(id) != null) {
+            mainService.getPlaylistService().remove(mainService.getPlaylistService().find(id));
             Response.ok().build();
         }
         return Response.status(Status.NOT_FOUND).build();
@@ -164,6 +167,7 @@ public class PlaylistResource {
 
     @Path("{playlistId}/songs/")
     public SongResource getSongs() {
-        return new SongResource();
+        GenericLinkWrapperFactory<Song> glwfs = new GenericLinkWrapperFactory<Song>();
+        return new SongResource(mainService , glwfs);
     }
 }

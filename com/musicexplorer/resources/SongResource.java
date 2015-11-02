@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.musicexplorer.controllers;
+package com.musicexplorer.resources;
 
-import com.musicexplorer.org.ejb.SongFacade;
+import com.musicexplorer.interfaces.MainService;
 import com.musicexplorer.org.entity.Artist;
 import com.musicexplorer.org.entity.Song;
 import static com.musicexplorer.org.entity.Song_.id;
@@ -15,8 +15,6 @@ import com.musicexplorer.org.utils.Link;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -41,7 +39,8 @@ import javax.ws.rs.core.UriInfo;
 public class SongResource {
 
     @EJB
-    SongFacade sm;
+    MainService mainService;
+
     @EJB
     GenericLinkWrapperFactory<Song> genericLWF;
 
@@ -49,14 +48,11 @@ public class SongResource {
     UriInfo uriInfo;
 
     public SongResource() {
-        try {
-            String lookupName = "java:module/SongFacade";
-            String lookupName2 = "java:module/GenericLinkWrapperFactory";
-            sm = (SongFacade) InitialContext.doLookup(lookupName);
-            genericLWF = (GenericLinkWrapperFactory) InitialContext.doLookup(lookupName2);
-        } catch (NamingException e) {
-            System.out.println("EXCEPTION MESSAGE:::" + e.getMessage());
-        }
+    }
+    
+    public SongResource(MainService mainService, GenericLinkWrapperFactory genericLinkWrapperFactory) {
+        this.mainService = mainService;
+        this.genericLWF = genericLinkWrapperFactory;
     }
 
     @GET
@@ -66,7 +62,7 @@ public class SongResource {
         List<GenericLinkWrapper> songLinkList = new ArrayList<GenericLinkWrapper>();
         this.uriInfo = uriInfo;
         if (aId != 0) {
-            list = sm.getSongsByArtist(aId);
+            list = mainService.getSongService().getSongsByArtist(aId);
             songLinkList = genericLWF.getById(list);
             for (GenericLinkWrapper<Song> artistSonglist : songLinkList) {
                 String uri = this.uriInfo.getBaseUriBuilder().
@@ -78,7 +74,7 @@ public class SongResource {
             return Response.ok().entity(songLinkList).build();
         }
         if (pId != 0) {
-            list = sm.getSongsByPlaylist(pId);
+            list = mainService.getSongService().getSongsByPlaylist(pId);
             songLinkList = genericLWF.getById(list);
             for (GenericLinkWrapper<Song> playlistSongList : songLinkList) {
                 String uri = this.uriInfo.getBaseUriBuilder().
@@ -105,7 +101,7 @@ public class SongResource {
     @GET
     @Path("{songId}")
     public Response getSong(@PathParam("songId") int id) {
-        Song song = sm.find(id);
+        Song song = mainService.getSongService().find(id);
 
 //        List<Song> list = new ArrayList<Song>();
 //        list.add(sm.find(id));
@@ -129,9 +125,9 @@ public class SongResource {
     public Response addSong(Song song, @PathParam("artistId") int id) {
         Song mSong = new Song();
         mSong = song;
-        Artist artist = sm.getArtist(id);
+        Artist artist = mainService.getSongService().getArtist(id);
         mSong.setArtist(artist);
-        sm.create(mSong);
+        mainService.getSongService().create(mSong);
         return Response.ok().entity(mSong).build();
     }
 
@@ -140,14 +136,14 @@ public class SongResource {
     public Response delSong(@PathParam("songId") int songId, @PathParam("playlistId") int playlistId) {
         System.out.println("playlistid " + playlistId + "\n songid " + songId);
         if (playlistId != 0) {
-            boolean removed = sm.removeSongFromPlaylist(songId, playlistId);
+            boolean removed = mainService.getSongService().removeSongFromPlaylist(songId, playlistId);
             if (removed) {
                 return Response.status(Status.OK).build();
             }
             return Response.status(Status.BAD_REQUEST).build();
         }
-        if (sm.find(songId) != null && playlistId == 0) {
-            sm.remove(sm.find(id));
+        if (mainService.getSongService().find(songId) != null && playlistId == 0) {
+            mainService.getSongService().remove(mainService.getSongService().find(id));
             return Response.status(Status.NO_CONTENT).build();
         }
         return Response.status(Status.BAD_REQUEST).build();
@@ -157,9 +153,9 @@ public class SongResource {
     @Path("{songId}")
     public Response editSong(Song song, @PathParam("songId") int songId) {
         System.out.println("Song id: " + songId);
-        
-        if (sm.find(songId) != null) {
-            Song mSong = sm.find(songId);
+
+        if (mainService.getSongService().find(songId) != null) {
+            Song mSong = mainService.getSongService().find(songId);
             song.setId(songId);
             if (song.getTitle() == null) {
                 song.setTitle(mSong.getTitle());
@@ -167,7 +163,7 @@ public class SongResource {
             if (song.getDuration() == null) {
                 song.setDuration(mSong.getDuration());
             }
-            sm.edit(song);
+            mainService.getSongService().edit(song);
             return Response.ok().build();
         }
         return Response.status(Response.Status.NOT_FOUND).build();

@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.musicexplorer.controllers;
+package com.musicexplorer.resources;
 
 import com.musicexplorer.org.ejb.FollowerFacade;
 import com.musicexplorer.org.ejb.PlaylistFacade;

@@ -69,7 +69,7 @@ public class Song implements DatePersistance , Serializable {
     private Date updated;
     @ManyToMany(mappedBy = "songCollection")
     private List<Playlist> playlistCollection;
-    @JoinColumn(name = "artistId", referencedColumnName = "id")
+    @JoinColumn(name = "artistId", referencedColumnName = "id", updatable = false)
     @ManyToOne(optional = false)
     private Artist artist;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "song")
