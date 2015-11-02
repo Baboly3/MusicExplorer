@@ -5,6 +5,7 @@
  */
 package com.musicexplorer.resources;
 
+import com.musicexplorer.exception.DataNotFoundException;
 import com.musicexplorer.interfaces.MainService;
 import com.musicexplorer.org.entity.Artist;
 import com.musicexplorer.org.entity.Song;
@@ -37,7 +38,6 @@ import javax.ws.rs.core.UriInfo;
 @Path("artists")
 public class ArtistResource {
 
-
     @EJB
     MainService mainService;
     @EJB
@@ -49,6 +49,10 @@ public class ArtistResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{artistId}/")
     public Response getArtist(@PathParam("artistId") int id) {
+
+        if (mainService.getArtistService().find(id) == null) {
+            throw new DataNotFoundException("Artist with id " + id + " not found");
+        }
         List<Artist> list = new ArrayList<Artist>();
         list.add(mainService.getArtistService().find(id));
         List<GenericLinkWrapper> artist = genericLWF.getById(list);
@@ -90,29 +94,32 @@ public class ArtistResource {
 
     @DELETE
     @Path("{artistId}")
-    public void delArtist(@PathParam("artistId") int id) {
+    public Response delArtist(@PathParam("artistId") int id) {
+
         if (mainService.getArtistService().find(id) != null) {
             mainService.getArtistService().remove(mainService.getArtistService().find(id));
+            Response.ok().build();
         }
+       throw new DataNotFoundException("Artist with id " + id + " not found");
     }
 
     @PUT
     @Path("{artistId}")
     public Response editArtist(Artist artist, @PathParam("artistId") int id) {
-        
+
         if (mainService.getArtistService().find(id) != null) {
             Artist mArtist = new Artist();
             mArtist = mainService.getArtistService().find(id);
             artist.setId(id);
-        if(artist.getGenrer() == null){
-            artist.setGenrer(mArtist.getGenrer());
-        }    
-        if(artist.getHistory() == null){
-            artist.setHistory(mArtist.getHistory());
-        }
-        if(artist.getName() == null){
-            artist.setName(mArtist.getName());
-        }
+            if (artist.getGenrer() == null) {
+                artist.setGenrer(mArtist.getGenrer());
+            }
+            if (artist.getHistory() == null) {
+                artist.setHistory(mArtist.getHistory());
+            }
+            if (artist.getName() == null) {
+                artist.setName(mArtist.getName());
+            }
             mainService.getArtistService().edit(artist);
             return Response.ok().build();
         } else {
@@ -123,6 +130,6 @@ public class ArtistResource {
     @Path("{artistId}/songs/")
     public SongResource getSongs() {
         GenericLinkWrapperFactory<Song> glwfs = new GenericLinkWrapperFactory<Song>();
-        return new SongResource(mainService, glwfs );
+        return new SongResource(mainService, glwfs);
     }
 }

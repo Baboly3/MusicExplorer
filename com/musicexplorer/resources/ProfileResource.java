@@ -128,7 +128,7 @@ public class ProfileResource{
 
     @Path("{profileId}/playlists/")
     public PlaylistResource getPlaylists() {
-        GenericLinkWrapperFactory glwfp = new GenericLinkWrapperFactory<Playlist>();
+        GenericLinkWrapperFactory<Playlist> glwfp = new GenericLinkWrapperFactory<Playlist>();
         return new PlaylistResource(mainService, glwfp);
     }
 

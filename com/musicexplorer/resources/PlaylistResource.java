@@ -121,7 +121,7 @@ public class PlaylistResource {
             playlist.setProfileid(mainService.getPlaylistService().getProfile(id));
         }
         List<Song> so = new ArrayList<>();
-        Collection<Song> songs = playlist.getSongCollection();
+        List<Song> songs = playlist.getSongCollection();
         if (songs != null) {
             for (Song s : songs) {
                 so.add(mainService.getPlaylistService().getSong(s.getId()));
