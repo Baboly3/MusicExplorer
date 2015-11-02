@@ -55,7 +55,7 @@ public class Share implements Serializable {
     private Playlist playlistid;
     @JoinColumns({
         @JoinColumn(name = "Song_id", referencedColumnName = "id"),
-        @JoinColumn(name = "Song_Artist_id", referencedColumnName = "Artist_id")})
+        @JoinColumn(name = "Song_Artist_id", referencedColumnName = "id")})
     @ManyToOne(optional = false)
     private Song song;
 

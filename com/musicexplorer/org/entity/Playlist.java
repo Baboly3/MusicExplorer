@@ -9,6 +9,7 @@ import com.musicexplorer.model.helper.DatePersistance;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -44,6 +45,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Playlist.findAll", query = "SELECT p FROM Playlist p"),
     @NamedQuery(name = "Playlist.findById", query = "SELECT p FROM Playlist p WHERE p.id = :id"),
     @NamedQuery(name = "Playlist.findByProfileId", query = "SELECT p FROM Playlist p WHERE p.profileid = :profileid"),
+    @NamedQuery(name = "Playlist.deleteSongFromPlaylist", query = "DELETE FROM Playlist p WHERE p.songCollection = :songCollection"),
     @NamedQuery(name = "Playlist.findByCreated", query = "SELECT p FROM Playlist p WHERE p.created = :created")})
 public class Playlist implements DatePersistance, Serializable {
 
@@ -68,14 +70,14 @@ public class Playlist implements DatePersistance, Serializable {
         @JoinColumn(name = "Song_id", referencedColumnName = "id"),
         @JoinColumn(name = "Song_Artist_id", referencedColumnName = "artistId")})
     @ManyToMany
-    private Collection<Song> songCollection;
+    private List<Song> songCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "playlistid")
-    private Collection<Follower> followerCollection;
+    private List<Follower> followerCollection;
     @JoinColumn(name = "Profile_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Profile profileid;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "playlistid")
-    private Collection<Share> shareCollection;
+    private List<Share> shareCollection;
 
     public Playlist() {
     }
@@ -109,20 +111,20 @@ public class Playlist implements DatePersistance, Serializable {
     }
 
     @XmlTransient
-    public Collection<Song> getSongCollection() {
+    public List<Song> getSongCollection() {
         return songCollection;
     }
 
-    public void setSongCollection(Collection<Song> songCollection) {
+    public void setSongCollection(List<Song> songCollection) {
         this.songCollection = songCollection;
     }
 
     @XmlTransient
-    public Collection<Follower> getFollowerCollection() {
+    public List<Follower> getFollowerCollection() {
         return followerCollection;
     }
 
-    public void setFollowerCollection(Collection<Follower> followerCollection) {
+    public void setFollowerCollection(List<Follower> followerCollection) {
         this.followerCollection = followerCollection;
     }
 
@@ -135,11 +137,11 @@ public class Playlist implements DatePersistance, Serializable {
     }
 
     @XmlTransient
-    public Collection<Share> getShareCollection() {
+    public List<Share> getShareCollection() {
         return shareCollection;
     }
 
-    public void setShareCollection(Collection<Share> shareCollection) {
+    public void setShareCollection(List<Share> shareCollection) {
         this.shareCollection = shareCollection;
     }
 

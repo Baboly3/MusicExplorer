@@ -9,6 +9,7 @@ import com.musicexplorer.model.helper.DatePersistance;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -44,6 +45,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Song.findById", query = "SELECT s FROM Song s WHERE s.id = :id"),
     @NamedQuery(name = "Song.findByTitle", query = "SELECT s FROM Song s WHERE s.title = :title"),
     @NamedQuery(name = "Song.findByDuration", query = "SELECT s FROM Song s WHERE s.duration = :duration"),
+    @NamedQuery(name = "Song.findByPlaylistId", query = "SELECT s FROM Song s WHERE s.playlistCollection = :playlistCollection"),
     @NamedQuery(name = "Song.findByCreated", query = "SELECT s FROM Song s WHERE s.created = :created"),
     @NamedQuery(name = "Song.findByArtist", query = "SELECT s FROM Song s WHERE s.artist = :artist")})
 public class Song implements DatePersistance , Serializable {
@@ -58,7 +60,7 @@ public class Song implements DatePersistance , Serializable {
     @Column(name = "title")
     private String title;
     @Column(name = "duration")
-    private Integer duration;
+    private Double duration;
     @Column(name = "created")
     @Temporal(TemporalType.DATE)
     private Date created;
@@ -66,12 +68,12 @@ public class Song implements DatePersistance , Serializable {
     @Temporal(TemporalType.DATE)
     private Date updated;
     @ManyToMany(mappedBy = "songCollection")
-    private Collection<Playlist> playlistCollection;
+    private List<Playlist> playlistCollection;
     @JoinColumn(name = "artistId", referencedColumnName = "id", updatable = false)
     @ManyToOne(optional = false)
     private Artist artist;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "song")
-    private Collection<Share> shareCollection;
+    private List<Share> shareCollection;
 
     public Song() {
     }
@@ -91,11 +93,11 @@ public class Song implements DatePersistance , Serializable {
         this.title = title;
     }
 
-    public Integer getDuration() {
+    public Double getDuration() {
         return duration;
     }
 
-    public void setDuration(Integer duration) {
+    public void setDuration(Double duration) {
         this.duration = duration;
     }
 
@@ -108,11 +110,11 @@ public class Song implements DatePersistance , Serializable {
     }
 
     @XmlTransient
-    public Collection<Playlist> getPlaylistCollection() {
+    public List<Playlist> getPlaylistCollection() {
         return playlistCollection;
     }
 
-    public void setPlaylistCollection(Collection<Playlist> playlistCollection) {
+    public void setPlaylistCollection(List<Playlist> playlistCollection) {
         this.playlistCollection = playlistCollection;
     }
 
@@ -125,11 +127,11 @@ public class Song implements DatePersistance , Serializable {
     }
 
     @XmlTransient
-    public Collection<Share> getShareCollection() {
+    public List<Share> getShareCollection() {
         return shareCollection;
     }
 
-    public void setShareCollection(Collection<Share> shareCollection) {
+    public void setShareCollection(List<Share> shareCollection) {
         this.shareCollection = shareCollection;
     }
 

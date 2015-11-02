@@ -7,8 +7,8 @@ package com.musicexplorer.org.entity;
 
 import com.musicexplorer.model.helper.DatePersistance;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -50,24 +50,24 @@ public class Profile implements DatePersistance, Serializable {
     @Column(name = "id")
     private Integer id;
     @Size(max = 45)
-    @Column(name = "firstName")
+    @Column(name = "firstName", nullable = false)
     private String firstName;
     @Size(max = 45)
-    @Column(name = "lastName")
+    @Column(name = "lastName", nullable = false)
     private String lastName;
     @Size(max = 45)
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     private String password;
-    @Column(name = "created")
+    @Column(name = "created", updatable = false, insertable = false)
     @Temporal(TemporalType.DATE)
     private Date created;
-    @Column(name = "updated")
+    @Column(name = "updated", updatable = false, insertable = false)
     @Temporal(TemporalType.DATE)
     private Date updated;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "profileid")
-    private Collection<Follower> followerCollection;
+    private List<Follower> followerCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "profileid")
-    private Collection<Playlist> playlistCollection;
+    private List<Playlist> playlistCollection;
 
     public Profile() {
     }
@@ -118,20 +118,20 @@ public class Profile implements DatePersistance, Serializable {
     
 
     @XmlTransient
-    public Collection<Follower> getFollowerCollection() {
+    public List<Follower> getFollowerCollection() {
         return followerCollection;
     }
 
-    public void setFollowerCollection(Collection<Follower> followerCollection) {
+    public void setFollowerCollection(List<Follower> followerCollection) {
         this.followerCollection = followerCollection;
     }
 
     @XmlTransient
-    public Collection<Playlist> getPlaylistCollection() {
+    public List<Playlist> getPlaylistCollection() {
         return playlistCollection;
     }
 
-    public void setPlaylistCollection(Collection<Playlist> playlistCollection) {
+    public void setPlaylistCollection(List<Playlist> playlistCollection) {
         this.playlistCollection = playlistCollection;
     }
 

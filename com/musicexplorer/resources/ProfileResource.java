@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.musicexplorer.controllers;
+package com.musicexplorer.resources;
 
-import com.musicexplorer.org.ejb.ProfileFacade;
+import com.musicexplorer.interfaces.MainService;
+import com.musicexplorer.org.entity.Playlist;
 import com.musicexplorer.org.entity.Profile;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapper;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapperFactory;
@@ -37,7 +38,7 @@ import javax.ws.rs.core.UriInfo;
 public class ProfileResource{
 
     @EJB
-    ProfileFacade pm;
+    MainService mainService;
     @EJB
     GenericLinkWrapperFactory<Profile> genericLWF;
 
@@ -45,11 +46,11 @@ public class ProfileResource{
     UriInfo uriInfo;
 
     @GET
-    @Path("{id}/")
-    public Response getProfile(@Context UriInfo uriInfo, @PathParam("id") int id) {
+    @Path("{profileId}/")
+    public Response getProfile(@Context UriInfo uriInfo, @PathParam("profileId") int id) {
 
         List<Profile> list = new ArrayList<Profile>();
-        list.add(pm.find(id));
+        list.add(mainService.getProfileSerivce().find(id));
         List<GenericLinkWrapper> profile = genericLWF.getById(list);
         this.uriInfo = uriInfo;
         String uri2 = uriInfo.getBaseUriBuilder().path(ProfileResource.class).path("playlists").build().toString();
@@ -81,40 +82,54 @@ public class ProfileResource{
             gl.setLink(new Link(uri, "profile"));
         }
         return Response.status(Status.OK).entity(profileList).build();
-
     }
 
     @POST
-    public Profile addProfile(Profile profile) {
+    public Response addProfile(Profile profile) {
         Profile mProfile = new Profile();
         mProfile = profile;
-        pm.create(mProfile);
-        return profile;
+        mainService.getProfileSerivce().create(mProfile);   
+        return Response.ok().entity(mProfile).build();
     }
 
     @DELETE
-    @Path("{id}")
-    public void delProfile(@PathParam("id") int id) {
-        if (pm.find(id) != null) {
-            pm.remove(pm.find(id));
+    @Path("{profileId}")
+    public Response delProfile(@PathParam("profileId") int id) {
+        if (mainService.getProfileSerivce().find(id) != null) {
+            mainService.getProfileSerivce().remove(mainService.getProfileSerivce().find(id));
+            return Response.ok().build();
         }
+        return Response.status(Status.BAD_REQUEST).build();
     }
 
     @PUT
-    @Path("{id}")
-    public Response editProfile(Profile profile, @PathParam("id") int id) {
-        profile.setId(id);
-        if (pm.find(id) != null) {
-            pm.edit(profile);
+    @Path("{profileId}")
+    public Response editProfile(Profile profile, @PathParam("profileId") int id) {
+        
+        if (mainService.getProfileSerivce().find(id) != null) {
+            Profile mProfile = new Profile();
+            mProfile = mainService.getProfileSerivce().find(id);
+            profile.setId(id);
+            if(profile.getFirstName() == null){
+                profile.setFirstName(mProfile.getFirstName());                
+            }
+            if(profile.getLastName() == null){
+                profile.setLastName(mProfile.getLastName());
+            }
+            if(profile.getPassword() == null){
+                profile.setPassword(mProfile.getPassword());
+            }
+            mainService.getProfileSerivce().edit(profile);
             return Response.ok().build();
         } else {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
     }
 
-    @Path("{id}/playlists/")
+    @Path("{profileId}/playlists/")
     public PlaylistResource getPlaylists() {
-        return new PlaylistResource();
+        GenericLinkWrapperFactory glwfp = new GenericLinkWrapperFactory<Playlist>();
+        return new PlaylistResource(mainService, glwfp);
     }
 
 }

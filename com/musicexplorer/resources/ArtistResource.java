@@ -3,12 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.musicexplorer.controllers;
+package com.musicexplorer.resources;
 
-import com.musicexplorer.org.ejb.ArtistFacade;
-import com.musicexplorer.org.ejb.SongFacade;
+import com.musicexplorer.interfaces.MainService;
 import com.musicexplorer.org.entity.Artist;
-import com.musicexplorer.org.entity.Playlist;
 import com.musicexplorer.org.entity.Song;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapper;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapperFactory;
@@ -16,7 +14,6 @@ import com.musicexplorer.org.utils.Link;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
-import javax.persistence.Query;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -40,22 +37,20 @@ import javax.ws.rs.core.UriInfo;
 @Path("artists")
 public class ArtistResource {
 
+
     @EJB
-    ArtistFacade am;
-    @EJB
-    SongFacade sm;
+    MainService mainService;
     @EJB
     GenericLinkWrapperFactory<Artist> genericLWF;
-
     @Context
     UriInfo uriInfo;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id}/")
-    public Response getArtist(@PathParam("id") int id) {
+    @Path("{artistId}/")
+    public Response getArtist(@PathParam("artistId") int id) {
         List<Artist> list = new ArrayList<Artist>();
-        list.add(am.find(id));
+        list.add(mainService.getArtistService().find(id));
         List<GenericLinkWrapper> artist = genericLWF.getById(list);
         for (GenericLinkWrapper<Artist> pl : artist) {
 
@@ -89,33 +84,45 @@ public class ArtistResource {
     public Artist addArtist(Artist artist) {
         Artist mArtist = new Artist();
         mArtist = artist;
-        am.create(mArtist);
+        mainService.getArtistService().create(mArtist);
         return mArtist;
     }
 
     @DELETE
-    @Path("{id}")
-    public void delArtist(@PathParam("id") int id) {
-        if (am.find(id) != null) {
-            am.remove(am.find(id));
+    @Path("{artistId}")
+    public void delArtist(@PathParam("artistId") int id) {
+        if (mainService.getArtistService().find(id) != null) {
+            mainService.getArtistService().remove(mainService.getArtistService().find(id));
         }
     }
 
     @PUT
-    @Path("{id}")
-    public Response editArtist(Artist artist, @PathParam("id") int id) {
-        artist.setId(id);
-        if (am.find(id) != null) {
-            am.edit(artist);
+    @Path("{artistId}")
+    public Response editArtist(Artist artist, @PathParam("artistId") int id) {
+        
+        if (mainService.getArtistService().find(id) != null) {
+            Artist mArtist = new Artist();
+            mArtist = mainService.getArtistService().find(id);
+            artist.setId(id);
+        if(artist.getGenrer() == null){
+            artist.setGenrer(mArtist.getGenrer());
+        }    
+        if(artist.getHistory() == null){
+            artist.setHistory(mArtist.getHistory());
+        }
+        if(artist.getName() == null){
+            artist.setName(mArtist.getName());
+        }
+            mainService.getArtistService().edit(artist);
             return Response.ok().build();
         } else {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
     }
 
-    @GET
-    @Path("{id}/songs/")
-    public SongResource getSongResource() {
-        return new SongResource();
+    @Path("{artistId}/songs/")
+    public SongResource getSongs() {
+        GenericLinkWrapperFactory<Song> glwfs = new GenericLinkWrapperFactory<Song>();
+        return new SongResource(mainService, glwfs );
     }
 }
