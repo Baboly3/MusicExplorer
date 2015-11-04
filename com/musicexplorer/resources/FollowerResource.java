@@ -28,11 +28,9 @@ import javax.ws.rs.core.MediaType;
 @Path("/playlists/{pId}/followers/")
 public class FollowerResource {
 
-    @EJB
+    
     FollowerFacade fm;
-    @EJB
     PlaylistFacade pm;
-    @EJB
     ProfileFacade  profileManager;
     
     @GET

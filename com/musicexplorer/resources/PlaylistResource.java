@@ -40,9 +40,8 @@ import javax.ws.rs.core.UriInfo;
 @Path("playlists")
 public class PlaylistResource {
 
-    @EJB
+    
     MainService mainService;
-    @EJB
     GenericLinkWrapperFactory<Playlist> genericLWF;
 
     @Context

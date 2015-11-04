@@ -37,9 +37,8 @@ import javax.ws.rs.core.UriInfo;
 @Path("profiles")
 public class ProfileResource{
 
-    @EJB
+    
     MainService mainService;
-    @EJB
     GenericLinkWrapperFactory<Profile> genericLWF;
 
     @Context

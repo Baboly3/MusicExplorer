@@ -38,10 +38,10 @@ import javax.ws.rs.core.UriInfo;
 @Path("songs")
 public class SongResource {
 
-    @EJB
+    
     MainService mainService;
 
-    @EJB
+    
     GenericLinkWrapperFactory<Song> genericLWF;
 
     @Context
