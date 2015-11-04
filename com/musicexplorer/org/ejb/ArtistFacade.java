@@ -17,6 +17,7 @@ import javax.persistence.PersistenceContext;
  */
 @Stateless
 public class ArtistFacade extends AbstractFacade<Artist> {
+    
     @PersistenceContext(unitName = "MusicExplorerPU")
     private EntityManager em;
 
