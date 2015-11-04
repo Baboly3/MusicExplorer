@@ -23,8 +23,11 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
@@ -48,7 +51,7 @@ public class ArtistResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{artistId}/")
-    public Response getArtist(@PathParam("artistId") int id) {
+    public Response getArtist(@PathParam("artistId") int id, @Context Request request) {
 
         if (mainService.getArtistService().find(id) == null) {
             throw new DataNotFoundException("Artist with id " + id + " not found");
@@ -56,6 +59,7 @@ public class ArtistResource {
         List<Artist> list = new ArrayList<Artist>();
         list.add(mainService.getArtistService().find(id));
         List<GenericLinkWrapper> artist = genericLWF.getById(list);
+        int hashValue = 0;
         for (GenericLinkWrapper<Artist> pl : artist) {
 
             String uri = uriInfo.getBaseUriBuilder().
@@ -63,8 +67,22 @@ public class ArtistResource {
                     path(Integer.toString(pl.getEntity().getId())).path("songs").
                     build().toString();
             pl.setLink(new Link(uri, "Artist songs"));
+            hashValue += pl.hashCode();
         }
-        return Response.status(Status.OK).entity(artist).build();
+        CacheControl cc = new CacheControl();
+        cc.setMaxAge(86400);
+        cc.setPrivate(true);
+
+        EntityTag eTag = new EntityTag(Integer.toString(hashValue));
+        
+        Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
+        //Cash resource did change
+        if (builder == null) {
+            builder = Response.ok(artist);
+            builder.tag(eTag);
+        }
+        builder.cacheControl(cc);
+        return builder.build();
     }
 
     @GET
@@ -75,10 +93,12 @@ public class ArtistResource {
 
         for (GenericLinkWrapper<Artist> gl : artistList) {
             String uri = this.uriInfo.getBaseUriBuilder().
-                    path(ArtistResource.class).
+                    path(ArtistResource.class
+                    ).
                     path(Integer.toString(gl.getEntity().getId())).
                     build().toString();
-            gl.setLink(new Link(uri, "artist"));
+            gl.setLink(
+                    new Link(uri, "artist"));
         }
         return Response.status(Status.OK).entity(artistList).build();
 
@@ -100,7 +120,7 @@ public class ArtistResource {
             mainService.getArtistService().remove(mainService.getArtistService().find(id));
             Response.ok().build();
         }
-       throw new DataNotFoundException("Artist with id " + id + " not found");
+        throw new DataNotFoundException("Artist with id " + id + " not found");
     }
 
     @PUT
