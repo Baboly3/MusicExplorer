@@ -143,7 +143,7 @@ public class SongResource {
             return Response.status(Status.BAD_REQUEST).build();
         }
         if (mainService.getSongService().find(songId) != null && playlistId == 0) {
-            mainService.getSongService().remove(mainService.getSongService().find(id));
+            mainService.getSongService().remove(mainService.getSongService().find(songId));
             return Response.status(Status.NO_CONTENT).build();
         }
         return Response.status(Status.BAD_REQUEST).build();
