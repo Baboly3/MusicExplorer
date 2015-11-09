@@ -6,8 +6,6 @@
 
 package com.musicexplorer.org.utils;
 
-import java.util.HashMap;
-import java.util.Map;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.EntityTag;
 
@@ -32,8 +30,7 @@ public class Cashing<T> {
         
         return cc;
     }
-    public EntityTag getEntityTag(){
-        
+    public EntityTag getEntityTag(){        
          EntityTag eTag = new EntityTag(Integer.toString(hashValue));
          return eTag;
     }

@@ -60,10 +60,11 @@ public class SongResource {
     }
 
     @GET
-    public Response getSongs(@Context UriInfo uriInfo, @PathParam("artistId") int aId, @PathParam("playlistId") int pId,@Context Request request) {
+    public Response getSongs(@Context UriInfo uriInfo, @PathParam("artistId") int aId, @PathParam("playlistId") int pId, @Context Request request) {
         System.out.println("artistid " + aId + "/nplaylistId " + pId);
         List<Song> list = new ArrayList<Song>();
         List<GenericLinkWrapper> songLinkList = new ArrayList<GenericLinkWrapper>();
+        Cashing cashing = new Cashing();           
         this.uriInfo = uriInfo;
         if (aId != 0) {
             list = mainService.getSongService().getSongsByArtist(aId);
@@ -75,9 +76,9 @@ public class SongResource {
                         build().toString();
                 artistSonglist.setLink(new Link(uri, "Artist Song"));
             }
-            Cashing cashing = new Cashing();
-            CacheControl cc = cashing.setCacheControl(86400, true, list);
             
+            CacheControl cc = cashing.setCacheControl(86400, true, list);
+
             Response.ResponseBuilder builder = request.evaluatePreconditions(cashing.getEntityTag());
             if (builder == null) {
                 builder = Response.ok(list);
@@ -96,8 +97,15 @@ public class SongResource {
                         path(Integer.toString(playlistSongList.getEntity().getId())).
                         build().toString();
                 playlistSongList.setLink(new Link(uri, "Artist Song"));
+            }           
+            CacheControl cc = cashing.setCacheControl(86400, true, list);
+            Response.ResponseBuilder builder = request.evaluatePreconditions(cashing.getEntityTag());
+            if (builder == null) {
+                builder = Response.ok(list);
+                builder.tag(cashing.getEntityTag());
             }
-            return Response.ok().entity(songLinkList).build();
+            builder.cacheControl(cc);
+            return builder.build();
         }
         this.uriInfo = uriInfo;
         Song song = new Song();
@@ -109,7 +117,16 @@ public class SongResource {
                     .build().toString();
             gl.setLink(new Link(uri, "songs"));
         }
-        return Response.status(Status.OK).entity(songList).build();
+
+        CacheControl cc = cashing.setCacheControl(86400, true, list);
+        Response.ResponseBuilder builder = request.evaluatePreconditions(cashing.getEntityTag());
+        if (builder == null) {
+            builder = Response.ok(list);
+            builder.tag(cashing.getEntityTag());
+        }
+        builder.cacheControl(cc);
+        return builder.build();
+
     }
 
     @GET

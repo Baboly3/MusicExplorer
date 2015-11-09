@@ -5,6 +5,7 @@
  */
 package com.musicexplorer.resources;
 
+import com.musicexplorer.exception.DataNotFoundException;
 import com.musicexplorer.interfaces.MainService;
 import com.musicexplorer.org.entity.Artist;
 import com.musicexplorer.org.entity.Song;
@@ -50,6 +51,10 @@ public class ArtistResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{artistId}/")
     public Response getArtist(@PathParam("artistId") int id) {
+        
+        if(mainService.getArtistService().find(id) == null){
+            throw new DataNotFoundException("This id doesnt exist!");
+        }
         List<Artist> list = new ArrayList<Artist>();
         list.add(mainService.getArtistService().find(id));
         List<GenericLinkWrapper> artist = genericLWF.getById(list);
