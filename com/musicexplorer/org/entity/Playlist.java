@@ -70,6 +70,7 @@ public class Playlist implements DatePersistance, Serializable {
         @JoinColumn(name = "Song_id", referencedColumnName = "id"),
         @JoinColumn(name = "Song_Artist_id", referencedColumnName = "artistId")})
     @ManyToMany
+    @XmlTransient
     private List<Song> songCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "playlistid")
     private List<Follower> followerCollection;
