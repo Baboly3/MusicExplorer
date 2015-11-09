@@ -156,8 +156,6 @@ public class Song implements DatePersistance , Serializable {
         return true;
     }
 
-   
-
     @Override
     public String toString() {
         return "Song{" + "id=" + id + ", title=" + title + ", duration=" + duration + ", created=" + created + ", updated=" + updated + ", playlistCollection=" + playlistCollection + ", artist=" + artist + ", shareCollection=" + shareCollection + '}';

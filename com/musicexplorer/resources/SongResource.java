@@ -11,6 +11,7 @@ import com.musicexplorer.org.entity.Song;
 import static com.musicexplorer.org.entity.Song_.id;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapper;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapperFactory;
+import com.musicexplorer.org.utils.Cashing;
 import com.musicexplorer.org.utils.Link;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,14 +53,14 @@ public class SongResource {
 
     public SongResource() {
     }
-    
+
     public SongResource(MainService mainService, GenericLinkWrapperFactory genericLinkWrapperFactory) {
         this.mainService = mainService;
         this.genericLWF = genericLinkWrapperFactory;
     }
 
     @GET
-    public Response getSongs(@Context UriInfo uriInfo, @PathParam("artistId") int aId, @PathParam("playlistId") int pId) {
+    public Response getSongs(@Context UriInfo uriInfo, @PathParam("artistId") int aId, @PathParam("playlistId") int pId,@Context Request request) {
         System.out.println("artistid " + aId + "/nplaylistId " + pId);
         List<Song> list = new ArrayList<Song>();
         List<GenericLinkWrapper> songLinkList = new ArrayList<GenericLinkWrapper>();
@@ -74,7 +75,17 @@ public class SongResource {
                         build().toString();
                 artistSonglist.setLink(new Link(uri, "Artist Song"));
             }
-            return Response.ok().entity(songLinkList).build();
+            Cashing cashing = new Cashing();
+            CacheControl cc = cashing.setCacheControl(86400, true, list);
+            
+            Response.ResponseBuilder builder = request.evaluatePreconditions(cashing.getEntityTag());
+            if (builder == null) {
+                builder = Response.ok(list);
+                builder.tag(cashing.getEntityTag());
+            }
+            builder.cacheControl(cc);
+            return builder.build();
+
         }
         if (pId != 0) {
             list = mainService.getSongService().getSongsByPlaylist(pId);
@@ -103,26 +114,26 @@ public class SongResource {
 
     @GET
     @Path("{songId}")
-    public Response getSong(@PathParam("songId") int id, Request request) {
+    public Response getSong(@PathParam("songId") int id, @Context Request request) {
         Song song = mainService.getSongService().find(id);
 
         int hashValue = song.hashCode();
 
-
         CacheControl cc = new CacheControl();
         cc.setMaxAge(86400);
         cc.setPrivate(true);
-        
+
         EntityTag eTag = new EntityTag(Integer.toString(hashValue));
-        
+
         Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
         //Cash resource did change
-        if(builder == null){
+        if (builder == null) {
             builder = Response.ok(song);
             builder.tag(eTag);
         }
         builder.cacheControl(cc);
         return builder.build();
+
     }
 
     @POST

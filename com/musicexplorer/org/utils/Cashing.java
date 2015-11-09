@@ -18,21 +18,23 @@ import javax.ws.rs.core.EntityTag;
 public class Cashing<T> {
 
     private Class<T> entityClass;
-    
+    private int hashValue;
     CacheControl cc; 
     
     public Cashing(){
         cc = new CacheControl();
     }
     
-    public Map setCashing(int maxAge, boolean privateTorF, T entity){
-        int hashValue = entity.hashCode();
-        CacheControl cc = new CacheControl();
+    public CacheControl setCacheControl(int maxAge, boolean privat, T entity){
+        hashValue = entity.hashCode();
         cc.setMaxAge(maxAge);
-        cc.setPrivate(privateTorF);      
-        EntityTag eTag = new EntityTag(Integer.toString(hashValue));        
-        Map<CacheControl,EntityTag> cashing = new HashMap();
-        cashing.put(cc, eTag);
-        return cashing;
+        cc.setPrivate(privat);      
+        
+        return cc;
+    }
+    public EntityTag getEntityTag(){
+        
+         EntityTag eTag = new EntityTag(Integer.toString(hashValue));
+         return eTag;
     }
 }

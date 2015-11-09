@@ -14,6 +14,7 @@ import com.musicexplorer.org.utils.Link;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -81,7 +82,7 @@ public class ArtistResource {
     }
 
     @POST
-    public Artist addArtist(Artist artist) {
+    public Artist addArtist(@Valid Artist artist) {
         Artist mArtist = new Artist();
         mArtist = artist;
         mainService.getArtistService().create(mArtist);
@@ -98,7 +99,7 @@ public class ArtistResource {
 
     @PUT
     @Path("{artistId}")
-    public Response editArtist(Artist artist, @PathParam("artistId") int id) {
+    public Response editArtist(@Valid Artist artist, @PathParam("artistId") int id) {
         
         if (mainService.getArtistService().find(id) != null) {
             Artist mArtist = new Artist();
