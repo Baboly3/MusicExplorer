@@ -138,13 +138,9 @@ public class Song implements DatePersistance , Serializable {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 83 * hash + Objects.hashCode(this.title);
-        hash = 83 * hash + Objects.hashCode(this.duration);
-        hash = 83 * hash + Objects.hashCode(this.created);
-        hash = 83 * hash + Objects.hashCode(this.updated);
-        hash = 83 * hash + Objects.hashCode(this.playlistCollection);
-        hash = 83 * hash + Objects.hashCode(this.artist);
-        hash = 83 * hash + Objects.hashCode(this.shareCollection);
+        hash = 71 * hash + Objects.hashCode(this.title);
+        hash = 71 * hash + Objects.hashCode(this.duration);
+        hash = 71 * hash + Objects.hashCode(this.updated);
         return hash;
     }
 
@@ -157,11 +153,10 @@ public class Song implements DatePersistance , Serializable {
             return false;
         }
         final Song other = (Song) obj;
-        if (!Objects.equals(this.id, other.id)) {
-            return false;
-        }
         return true;
     }
+
+   
 
     @Override
     public String toString() {

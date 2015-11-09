@@ -23,8 +23,11 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
@@ -100,25 +103,26 @@ public class SongResource {
 
     @GET
     @Path("{songId}")
-    public Response getSong(@PathParam("songId") int id) {
+    public Response getSong(@PathParam("songId") int id, Request request) {
         Song song = mainService.getSongService().find(id);
 
-//        List<Song> list = new ArrayList<Song>();
-//        list.add(sm.find(id));
-//        List<GenericLinkWrapper> songLinkList = genericLWF.getById(list);
-//        this.uriInfo = uriInfo;
-//        String uri2 = uriInfo.getBaseUriBuilder().path(ProfileResource.class).path("playlists").build().toString();
-//        int size = 0;
-//        for (GenericLinkWrapper<Song> pl : songLinkList) {
-//            size++;
-//            System.out.println("Size :" + size);
-//            String uri = this.uriInfo.getBaseUriBuilder().
-//                    path(SongResource.class).
-//                    path(Integer.toString(pl.getEntity().getId())).
-//                    build().toString();
-//            pl.setLink(new Link(uri, "Artist Song"));
-//        }
-        return Response.status(Status.OK).entity(song).build();
+        int hashValue = song.hashCode();
+
+
+        CacheControl cc = new CacheControl();
+        cc.setMaxAge(86400);
+        cc.setPrivate(true);
+        
+        EntityTag eTag = new EntityTag(Integer.toString(hashValue));
+        
+        Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
+        //Cash resource did change
+        if(builder == null){
+            builder = Response.ok(song);
+            builder.tag(eTag);
+        }
+        builder.cacheControl(cc);
+        return builder.build();
     }
 
     @POST
