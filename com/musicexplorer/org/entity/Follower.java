@@ -7,6 +7,7 @@
 package com.musicexplorer.org.entity;
 
 import java.io.Serializable;
+import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -89,23 +90,35 @@ public class Follower implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        int hash = 3;
+        hash = 17 * hash + Objects.hashCode(this.artistid);
+        hash = 17 * hash + Objects.hashCode(this.playlistid);
+        hash = 17 * hash + Objects.hashCode(this.profileid);
         return hash;
     }
 
     @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Follower)) {
+    public boolean equals(Object obj) {
+        if (obj == null) {
             return false;
         }
-        Follower other = (Follower) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Follower other = (Follower) obj;
+        if (!Objects.equals(this.artistid, other.artistid)) {
+            return false;
+        }
+        if (!Objects.equals(this.playlistid, other.playlistid)) {
+            return false;
+        }
+        if (!Objects.equals(this.profileid, other.profileid)) {
             return false;
         }
         return true;
     }
+
+
 
     @Override
     public String toString() {

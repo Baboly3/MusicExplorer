@@ -9,6 +9,7 @@ import com.musicexplorer.model.helper.DatePersistance;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -137,8 +138,14 @@ public class Profile implements DatePersistance, Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        int hash = 3;
+        hash = 23 * hash + Objects.hashCode(this.firstName);
+        hash = 23 * hash + Objects.hashCode(this.lastName);
+        hash = 23 * hash + Objects.hashCode(this.password);
+        hash = 23 * hash + Objects.hashCode(this.created);
+        hash = 23 * hash + Objects.hashCode(this.updated);
+        hash = 23 * hash + Objects.hashCode(this.followerCollection);
+        hash = 23 * hash + Objects.hashCode(this.playlistCollection);
         return hash;
     }
 
