@@ -5,6 +5,7 @@
  */
 package com.musicexplorer.resources;
 
+import com.musicexplorer.exception.DataNotFoundException;
 import com.musicexplorer.interfaces.MainService;
 import com.musicexplorer.org.entity.Artist;
 import com.musicexplorer.org.entity.Song;
@@ -14,6 +15,7 @@ import com.musicexplorer.org.utils.Link;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -49,6 +51,10 @@ public class ArtistResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{artistId}/")
     public Response getArtist(@PathParam("artistId") int id) {
+        
+        if(mainService.getArtistService().find(id) == null){
+            throw new DataNotFoundException("This id doesnt exist!");
+        }
         List<Artist> list = new ArrayList<Artist>();
         list.add(mainService.getArtistService().find(id));
         List<GenericLinkWrapper> artist = genericLWF.getById(list);
@@ -81,7 +87,7 @@ public class ArtistResource {
     }
 
     @POST
-    public Artist addArtist(Artist artist) {
+    public Artist addArtist(@Valid Artist artist) {
         Artist mArtist = new Artist();
         mArtist = artist;
         mainService.getArtistService().create(mArtist);
@@ -98,7 +104,7 @@ public class ArtistResource {
 
     @PUT
     @Path("{artistId}")
-    public Response editArtist(Artist artist, @PathParam("artistId") int id) {
+    public Response editArtist(@Valid Artist artist, @PathParam("artistId") int id) {
         
         if (mainService.getArtistService().find(id) != null) {
             Artist mArtist = new Artist();

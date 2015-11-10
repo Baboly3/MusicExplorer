@@ -9,6 +9,7 @@ import com.musicexplorer.model.helper.DatePersistance;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -141,23 +142,51 @@ public class Artist implements DatePersistance, Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        int hash = 7;
+        hash = 59 * hash + Objects.hashCode(this.name);
+        hash = 59 * hash + Objects.hashCode(this.history);
+        hash = 59 * hash + Objects.hashCode(this.genrer);
+        hash = 59 * hash + Objects.hashCode(this.created);
+        hash = 59 * hash + Objects.hashCode(this.updated);
+        hash = 59 * hash + Objects.hashCode(this.songCollection);
+        hash = 59 * hash + Objects.hashCode(this.followerCollection);
         return hash;
     }
 
     @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Artist)) {
+    public boolean equals(Object obj) {
+        if (obj == null) {
             return false;
         }
-        Artist other = (Artist) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Artist other = (Artist) obj;
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        if (!Objects.equals(this.history, other.history)) {
+            return false;
+        }
+        if (!Objects.equals(this.genrer, other.genrer)) {
+            return false;
+        }
+        if (!Objects.equals(this.created, other.created)) {
+            return false;
+        }
+        if (!Objects.equals(this.updated, other.updated)) {
+            return false;
+        }
+        if (!Objects.equals(this.songCollection, other.songCollection)) {
+            return false;
+        }
+        if (!Objects.equals(this.followerCollection, other.followerCollection)) {
             return false;
         }
         return true;
     }
+
+
 
     @Override
     public String toString() {

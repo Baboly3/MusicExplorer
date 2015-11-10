@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -148,8 +149,14 @@ public class Playlist implements DatePersistance, Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        int hash = 7;
+        hash = 59 * hash + Objects.hashCode(this.playlist);
+        hash = 59 * hash + Objects.hashCode(this.created);
+        hash = 59 * hash + Objects.hashCode(this.updated);
+        hash = 59 * hash + Objects.hashCode(this.songCollection);
+        hash = 59 * hash + Objects.hashCode(this.followerCollection);
+        hash = 59 * hash + Objects.hashCode(this.profileid);
+        hash = 59 * hash + Objects.hashCode(this.shareCollection);
         return hash;
     }
 

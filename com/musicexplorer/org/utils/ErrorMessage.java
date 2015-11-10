@@ -26,7 +26,7 @@ public class ErrorMessage {
         this.errorMessage = errorMessage;
         this.errorCode = errorCode;
         this.documentationLink = documentationLink;
-        System.out.println("Errormessage xxx");
+        
     }
 
     public String getErrorMessage() {

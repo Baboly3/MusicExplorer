@@ -138,7 +138,9 @@ public class Song implements DatePersistance , Serializable {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 97 * hash + Objects.hashCode(this.id);
+        hash = 71 * hash + Objects.hashCode(this.title);
+        hash = 71 * hash + Objects.hashCode(this.duration);
+        hash = 71 * hash + Objects.hashCode(this.updated);
         return hash;
     }
 
@@ -151,9 +153,6 @@ public class Song implements DatePersistance , Serializable {
             return false;
         }
         final Song other = (Song) obj;
-        if (!Objects.equals(this.id, other.id)) {
-            return false;
-        }
         return true;
     }
 

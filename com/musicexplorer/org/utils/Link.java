@@ -5,6 +5,8 @@
  */
 package com.musicexplorer.org.utils;
 
+import java.util.Objects;
+
 /**
  *
  * @author Babak Tamjidi baboly@gmail.com
@@ -36,6 +38,26 @@ public class Link {
 
     public void setRel(String rel) {
         this.rel = rel;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + Objects.hashCode(this.uri);
+        hash = 97 * hash + Objects.hashCode(this.rel);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Link other = (Link) obj;
+        return true;
     }
     
     

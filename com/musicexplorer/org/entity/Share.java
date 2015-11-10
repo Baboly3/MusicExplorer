@@ -8,6 +8,7 @@ package com.musicexplorer.org.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -108,8 +109,11 @@ public class Share implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        int hash = 7;
+        hash = 53 * hash + Objects.hashCode(this.date);
+        hash = 53 * hash + Objects.hashCode(this.note);
+        hash = 53 * hash + Objects.hashCode(this.playlistid);
+        hash = 53 * hash + Objects.hashCode(this.song);
         return hash;
     }
 

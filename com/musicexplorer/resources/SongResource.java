@@ -11,6 +11,7 @@ import com.musicexplorer.org.entity.Song;
 import static com.musicexplorer.org.entity.Song_.id;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapper;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapperFactory;
+import com.musicexplorer.org.utils.Cashing;
 import com.musicexplorer.org.utils.Link;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +24,11 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
@@ -49,17 +53,18 @@ public class SongResource {
 
     public SongResource() {
     }
-    
+
     public SongResource(MainService mainService, GenericLinkWrapperFactory genericLinkWrapperFactory) {
         this.mainService = mainService;
         this.genericLWF = genericLinkWrapperFactory;
     }
 
     @GET
-    public Response getSongs(@Context UriInfo uriInfo, @PathParam("artistId") int aId, @PathParam("playlistId") int pId) {
+    public Response getSongs(@Context UriInfo uriInfo, @PathParam("artistId") int aId, @PathParam("playlistId") int pId, @Context Request request) {
         System.out.println("artistid " + aId + "/nplaylistId " + pId);
         List<Song> list = new ArrayList<Song>();
         List<GenericLinkWrapper> songLinkList = new ArrayList<GenericLinkWrapper>();
+        Cashing cashing = new Cashing();           
         this.uriInfo = uriInfo;
         if (aId != 0) {
             list = mainService.getSongService().getSongsByArtist(aId);
@@ -71,7 +76,17 @@ public class SongResource {
                         build().toString();
                 artistSonglist.setLink(new Link(uri, "Artist Song"));
             }
-            return Response.ok().entity(songLinkList).build();
+            
+            CacheControl cc = cashing.setCacheControl(86400, true, list);
+
+            Response.ResponseBuilder builder = request.evaluatePreconditions(cashing.getEntityTag());
+            if (builder == null) {
+                builder = Response.ok(list);
+                builder.tag(cashing.getEntityTag());
+            }
+            builder.cacheControl(cc);
+            return builder.build();
+
         }
         if (pId != 0) {
             list = mainService.getSongService().getSongsByPlaylist(pId);
@@ -82,8 +97,15 @@ public class SongResource {
                         path(Integer.toString(playlistSongList.getEntity().getId())).
                         build().toString();
                 playlistSongList.setLink(new Link(uri, "Artist Song"));
+            }           
+            CacheControl cc = cashing.setCacheControl(86400, true, list);
+            Response.ResponseBuilder builder = request.evaluatePreconditions(cashing.getEntityTag());
+            if (builder == null) {
+                builder = Response.ok(list);
+                builder.tag(cashing.getEntityTag());
             }
-            return Response.ok().entity(songLinkList).build();
+            builder.cacheControl(cc);
+            return builder.build();
         }
         this.uriInfo = uriInfo;
         Song song = new Song();
@@ -95,30 +117,40 @@ public class SongResource {
                     .build().toString();
             gl.setLink(new Link(uri, "songs"));
         }
-        return Response.status(Status.OK).entity(songList).build();
+
+        CacheControl cc = cashing.setCacheControl(86400, true, list);
+        Response.ResponseBuilder builder = request.evaluatePreconditions(cashing.getEntityTag());
+        if (builder == null) {
+            builder = Response.ok(list);
+            builder.tag(cashing.getEntityTag());
+        }
+        builder.cacheControl(cc);
+        return builder.build();
+
     }
 
     @GET
     @Path("{songId}")
-    public Response getSong(@PathParam("songId") int id) {
+    public Response getSong(@PathParam("songId") int id, @Context Request request) {
         Song song = mainService.getSongService().find(id);
 
-//        List<Song> list = new ArrayList<Song>();
-//        list.add(sm.find(id));
-//        List<GenericLinkWrapper> songLinkList = genericLWF.getById(list);
-//        this.uriInfo = uriInfo;
-//        String uri2 = uriInfo.getBaseUriBuilder().path(ProfileResource.class).path("playlists").build().toString();
-//        int size = 0;
-//        for (GenericLinkWrapper<Song> pl : songLinkList) {
-//            size++;
-//            System.out.println("Size :" + size);
-//            String uri = this.uriInfo.getBaseUriBuilder().
-//                    path(SongResource.class).
-//                    path(Integer.toString(pl.getEntity().getId())).
-//                    build().toString();
-//            pl.setLink(new Link(uri, "Artist Song"));
-//        }
-        return Response.status(Status.OK).entity(song).build();
+        int hashValue = song.hashCode();
+
+        CacheControl cc = new CacheControl();
+        cc.setMaxAge(86400);
+        cc.setPrivate(true);
+
+        EntityTag eTag = new EntityTag(Integer.toString(hashValue));
+
+        Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
+        //Cash resource did change
+        if (builder == null) {
+            builder = Response.ok(song);
+            builder.tag(eTag);
+        }
+        builder.cacheControl(cc);
+        return builder.build();
+
     }
 
     @POST
