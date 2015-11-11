@@ -5,6 +5,7 @@
  */
 package com.musicexplorer.resources;
 
+import com.musicexplorer.exception.DataNotFoundException;
 import com.musicexplorer.interfaces.MainService;
 import com.musicexplorer.org.entity.Playlist;
 import com.musicexplorer.org.entity.Song;
@@ -20,11 +21,13 @@ import javax.naming.NamingException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -47,28 +50,31 @@ public class PlaylistResource {
 
     @Context
     UriInfo uriInfo;
+    @Context
+    ResourceContext rc;
 
     public PlaylistResource() {
-        try { 
-            String lookupName = "java:module/MainServiceFacade"; 
-            String lookupName2 = "java:module/GenericLinkWrapperFactory"; 
-             mainService = (MainService) InitialContext.doLookup(lookupName); 
-             genericLWF = (GenericLinkWrapperFactory) InitialContext.doLookup(lookupName2); 
-         } catch (NamingException e) { 
-             System.out.println("EXCEPTION MESSAGE:::" + e.getMessage()); 
-         } 
-     } 
-
-    
+        try {
+            String lookupName = "java:module/MainServiceFacade";
+            String lookupName2 = "java:module/GenericLinkWrapperFactory";
+            mainService = (MainService) InitialContext.doLookup(lookupName);
+            genericLWF = (GenericLinkWrapperFactory) InitialContext.doLookup(lookupName2);
+        } catch (NamingException e) {
+            System.out.println("EXCEPTION MESSAGE:::" + e.getMessage());
+        }
+    }
 
     public PlaylistResource(MainService mainService, GenericLinkWrapperFactory genericLinkWrapperFactory) {
         this.mainService = mainService;
-        this.genericLWF = genericLinkWrapperFactory;  
+        this.genericLWF = genericLinkWrapperFactory;
     }
 
     @GET
     @Path("{playlistId}/")
-    public Response getPlaylist(@Context UriInfo uriInfo, @PathParam("playlistId") int id) {
+    public Response getPlaylist(@Context UriInfo uriInfo, @PathParam("playlistId") int id, @PathParam("profileId") int pId) {
+        if (mainService.getPlaylistService().find(id) == null) {
+            throw new DataNotFoundException("This playlist id doesnt exist");
+        }
         System.out.println("playlistID: " + id);
         Playlist playlist = mainService.getPlaylistService().find(id);
         List<Song> songs = playlist.getSongCollection();
@@ -77,9 +83,9 @@ public class PlaylistResource {
         this.uriInfo = uriInfo;
         for (GenericLinkWrapper<Song> songList : playlistLinkSongs) {
             String uri = this.uriInfo.getBaseUriBuilder().path(PlaylistResource.class).
-                    path(Integer.toString(id)).
+                    path(String.valueOf(id)).
                     path("songs").
-                    path(Integer.toString(songList.getEntity().getId())).
+                    path(String.valueOf(songList.getEntity().getId())).
                     build().toString();
             songList.setLink(new Link(uri, "Playlist song"));
         }
@@ -87,16 +93,19 @@ public class PlaylistResource {
     }
 
     @GET
-    public Response getPlaylists(@Context UriInfo uriInfo, @PathParam("profileId") int profileId) {
+    public Response getPlaylists(@Context UriInfo uriInfo, @PathParam("profileId") int profileId){
         System.out.println("profileID " + profileId);
         if (profileId != 0) {
-            List<Playlist> list = mainService.getPlaylistService().getPlaylistByProfileId(profileId); 
+            if (mainService.getProfileSerivce().find(profileId) == null) {
+                throw new DataNotFoundException("This profile id doesnt exist");
+            }
+            List<Playlist> list = mainService.getPlaylistService().getPlaylistByProfileId(profileId);
             List<GenericLinkWrapper> playlists = genericLWF.getById(list);
             this.uriInfo = uriInfo;
             for (GenericLinkWrapper<Playlist> pl : playlists) {
                 String uri = this.uriInfo.getBaseUriBuilder().
                         path(PlaylistResource.class).
-                        path(Integer.toString(pl.getEntity().getId())).
+                        path(String.valueOf(pl.getEntity().getId())).
                         build().toString();
                 pl.setLink(new Link(uri, "User playlist"));
             }
@@ -108,7 +117,7 @@ public class PlaylistResource {
         for (GenericLinkWrapper<Playlist> pl : playlists) {
             String uri = this.uriInfo.getBaseUriBuilder().
                     path(PlaylistResource.class).
-                    path(Integer.toString(pl.getEntity().getId())).
+                    path(String.valueOf(pl.getEntity().getId())).
                     build().toString();
             pl.setLink(new Link(uri, "playlist"));
         }
@@ -116,7 +125,8 @@ public class PlaylistResource {
     }
 
     @POST
-    public Response addPlaylist(Playlist playlist, @PathParam("profileId") int id) {
+    public Response addPlaylist(Playlist playlist, @PathParam("profileId") int id
+    ) {
         if (mainService.getPlaylistService().getProfile(id) != null) {
             playlist.setProfileid(mainService.getPlaylistService().getProfile(id));
         }
@@ -134,30 +144,32 @@ public class PlaylistResource {
 
     @PUT
     @Path("{playlistId}")
-    public Response addSongsToPlaylist(Playlist playlist, @PathParam("playlistId") int pid) {
+    public Response addSongsToPlaylist(Playlist playlist, @PathParam("playlistId") int pid
+    ) {
         Playlist mPlaylist = new Playlist();
 
         if (mainService.getPlaylistService().find(pid) != null) {
             mPlaylist = mainService.getPlaylistService().find(pid);
-        if (playlist.getPlaylist() == null){
-            playlist.setPlaylist(mPlaylist.getPlaylist());
+            if (playlist.getPlaylist() == null) {
+                playlist.setPlaylist(mPlaylist.getPlaylist());
+            }
+            List<Song> updatedPlaylist = mPlaylist.getSongCollection();
+            List<Song> songs = playlist.getSongCollection();
+            for (Song s : songs) {
+                updatedPlaylist.add(mainService.getPlaylistService().getSong(s.getId()));
+            }
+            mPlaylist.setSongCollection(updatedPlaylist);
+            mainService.getPlaylistService().edit(mPlaylist);
+
+            return Response.ok().entity(mPlaylist).build();
         }
-        List<Song> updatedPlaylist = mPlaylist.getSongCollection();
-        List<Song> songs = playlist.getSongCollection();
-        for (Song s : songs) {
-            updatedPlaylist.add(mainService.getPlaylistService().getSong(s.getId()));
-        }
-        mPlaylist.setSongCollection(updatedPlaylist);
-        mainService.getPlaylistService().edit(mPlaylist);
-        
-        return Response.ok().entity(mPlaylist).build(); 
-    }
         return Response.status(Status.BAD_REQUEST).build();
     }
 
     @DELETE
     @Path("{playlistId}")
-    public Response delPlaylist(@PathParam("playlistId") int id) {
+    public Response delPlaylist(@PathParam("playlistId") int id
+    ) {
         if (mainService.getPlaylistService().find(id) != null) {
             mainService.getPlaylistService().remove(mainService.getPlaylistService().find(id));
             Response.ok().build();
@@ -167,7 +179,8 @@ public class PlaylistResource {
 
     @Path("{playlistId}/songs/")
     public SongResource getSongs() {
-        GenericLinkWrapperFactory<Song> glwfs = new GenericLinkWrapperFactory<Song>();
-        return new SongResource(mainService , glwfs);
+//        GenericLinkWrapperFactory<Song> glwfs = new GenericLinkWrapperFactory<Song>();
+//        return new SongResource(mainService , glwfs);
+        return rc.getResource(SongResource.class);
     }
 }

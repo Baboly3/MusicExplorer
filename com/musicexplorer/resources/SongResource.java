@@ -5,10 +5,10 @@
  */
 package com.musicexplorer.resources;
 
+import com.musicexplorer.exception.DataNotFoundException;
 import com.musicexplorer.interfaces.MainService;
 import com.musicexplorer.org.entity.Artist;
 import com.musicexplorer.org.entity.Song;
-import static com.musicexplorer.org.entity.Song_.id;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapper;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapperFactory;
 import com.musicexplorer.org.utils.Cashing;
@@ -16,6 +16,7 @@ import com.musicexplorer.org.utils.Link;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -54,19 +55,22 @@ public class SongResource {
     public SongResource() {
     }
 
-    public SongResource(MainService mainService, GenericLinkWrapperFactory genericLinkWrapperFactory) {
-        this.mainService = mainService;
-        this.genericLWF = genericLinkWrapperFactory;
-    }
+//    public SongResource(MainService mainService, GenericLinkWrapperFactory genericLinkWrapperFactory) {
+//        this.mainService = mainService;
+//        this.genericLWF = genericLinkWrapperFactory;
+//    }
 
     @GET
     public Response getSongs(@Context UriInfo uriInfo, @PathParam("artistId") int aId, @PathParam("playlistId") int pId, @Context Request request) {
         System.out.println("artistid " + aId + "/nplaylistId " + pId);
         List<Song> list = new ArrayList<Song>();
         List<GenericLinkWrapper> songLinkList = new ArrayList<GenericLinkWrapper>();
-        Cashing cashing = new Cashing();           
+        Cashing cashing = new Cashing();
         this.uriInfo = uriInfo;
         if (aId != 0) {
+            if (mainService.getArtistService().find(aId) == null) {
+                throw new DataNotFoundException("The artist id doesnt exist");            
+            }
             list = mainService.getSongService().getSongsByArtist(aId);
             songLinkList = genericLWF.getById(list);
             for (GenericLinkWrapper<Song> artistSonglist : songLinkList) {
@@ -76,7 +80,7 @@ public class SongResource {
                         build().toString();
                 artistSonglist.setLink(new Link(uri, "Artist Song"));
             }
-            
+
             CacheControl cc = cashing.setCacheControl(86400, true, songLinkList);
 
             Response.ResponseBuilder builder = request.evaluatePreconditions(cashing.getEntityTag());
@@ -89,6 +93,9 @@ public class SongResource {
 
         }
         if (pId != 0) {
+            if (mainService.getPlaylistService().find(pId) == null) {
+                throw new DataNotFoundException("The playlist id doesnt exist");
+            }
             list = mainService.getSongService().getSongsByPlaylist(pId);
             songLinkList = genericLWF.getById(list);
             for (GenericLinkWrapper<Song> playlistSongList : songLinkList) {
@@ -97,7 +104,7 @@ public class SongResource {
                         path(Integer.toString(playlistSongList.getEntity().getId())).
                         build().toString();
                 playlistSongList.setLink(new Link(uri, "Artist Song"));
-            }           
+            }
             CacheControl cc = cashing.setCacheControl(86400, true, songLinkList);
             Response.ResponseBuilder builder = request.evaluatePreconditions(cashing.getEntityTag());
             if (builder == null) {
@@ -132,15 +139,18 @@ public class SongResource {
     @GET
     @Path("{songId}")
     public Response getSong(@PathParam("songId") int id, @Context Request request) {
-        Song song = mainService.getSongService().find(id);
 
+        if (mainService.getSongService().find(id) == null) {
+            throw new DataNotFoundException("This id doesnt exist");
+        }
+        Song song = mainService.getSongService().find(id);
         int hashValue = song.hashCode();
 
         CacheControl cc = new CacheControl();
         cc.setMaxAge(86400);
         cc.setPrivate(true);
 
-        EntityTag eTag = new EntityTag(Integer.toString(hashValue));
+        EntityTag eTag = new EntityTag(String.valueOf(hashValue));
 
         Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
         //Cash resource did change
@@ -154,7 +164,7 @@ public class SongResource {
     }
 
     @POST
-    public Response addSong(Song song, @PathParam("artistId") int id) {
+    public Response addSong(@Valid Song song, @PathParam("artistId") int id) {
         Song mSong = new Song();
         mSong = song;
         Artist artist = mainService.getSongService().getArtist(id);
@@ -183,10 +193,11 @@ public class SongResource {
 
     @PUT
     @Path("{songId}")
-    public Response editSong(Song song, @PathParam("songId") int songId) {
+    public Response editSong(@Valid Song song, @PathParam("songId") int songId) {
         System.out.println("Song id: " + songId);
-
-        if (mainService.getSongService().find(songId) != null) {
+        if (mainService.getSongService().find(songId) == null) {
+            throw new DataNotFoundException("This id doesnt exist");
+        } else if (mainService.getSongService().find(songId) != null) {
             Song mSong = mainService.getSongService().find(songId);
             song.setId(songId);
             if (song.getTitle() == null) {

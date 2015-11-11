@@ -25,6 +25,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -50,15 +51,18 @@ public class Profile implements DatePersistance, Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
+    @NotNull
     @Size(max = 45)
     @Column(name = "firstName", nullable = false)
     private String firstName;
+    @NotNull
     @Size(max = 45)
     @Column(name = "lastName", nullable = false)
     private String lastName;
-    @Size(max = 45)
-    @Column(name = "userName", nullable = false, unique = true)
-    private String userName;
+//    @Size(max = 45)
+//    @Column(name = "userName", nullable = false, unique = true)
+//    private String userName;
+    @NotNull
     @Size(max = 45)
     @Column(name = "password", nullable = false)
     private String password;

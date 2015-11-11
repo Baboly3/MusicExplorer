@@ -5,6 +5,7 @@
  */
 package com.musicexplorer.resources;
 
+import com.musicexplorer.exception.DataNotFoundException;
 import com.musicexplorer.interfaces.MainService;
 import com.musicexplorer.org.entity.Playlist;
 import com.musicexplorer.org.entity.Profile;
@@ -14,6 +15,7 @@ import com.musicexplorer.org.utils.Link;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -85,7 +87,7 @@ public class ProfileResource{
     }
 
     @POST
-    public Response addProfile(Profile profile) {
+    public Response addProfile(@Valid Profile profile) {
         Profile mProfile = new Profile();
         mProfile = profile;
         mainService.getProfileSerivce().create(mProfile);   
@@ -104,26 +106,13 @@ public class ProfileResource{
 
     @PUT
     @Path("{profileId}")
-    public Response editProfile(Profile profile, @PathParam("profileId") int id) {
+    public Response editProfile(@Valid Profile profile, @PathParam("profileId") int id) {
         
-        if (mainService.getProfileSerivce().find(id) != null) {
-            Profile mProfile = new Profile();
-            mProfile = mainService.getProfileSerivce().find(id);
-            profile.setId(id);
-            if(profile.getFirstName() == null){
-                profile.setFirstName(mProfile.getFirstName());                
-            }
-            if(profile.getLastName() == null){
-                profile.setLastName(mProfile.getLastName());
-            }
-            if(profile.getPassword() == null){
-                profile.setPassword(mProfile.getPassword());
+            if(mainService.getProfileSerivce().find(id) == null){
+                throw new DataNotFoundException("This profile id doesnt exist");
             }
             mainService.getProfileSerivce().edit(profile);
             return Response.ok().build();
-        } else {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
     }
 
     @Path("{profileId}/playlists/")

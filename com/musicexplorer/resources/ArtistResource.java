@@ -8,8 +8,6 @@ package com.musicexplorer.resources;
 import com.musicexplorer.exception.DataNotFoundException;
 import com.musicexplorer.interfaces.MainService;
 import com.musicexplorer.org.entity.Artist;
-import com.musicexplorer.org.entity.Playlist;
-import com.musicexplorer.org.entity.Song;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapper;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapperFactory;
 import com.musicexplorer.org.utils.Link;
@@ -25,6 +23,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -47,6 +46,8 @@ public class ArtistResource {
     GenericLinkWrapperFactory<Artist> genericLWF;
     @Context
     UriInfo uriInfo;
+    @Context
+    ResourceContext rc;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -60,7 +61,7 @@ public class ArtistResource {
         list.add(mainService.getArtistService().find(id));
         List<GenericLinkWrapper> artist = genericLWF.getById(list);
         
-        String uri2 = this.uriInfo.getBaseUriBuilder().path(ArtistResource.class).path(Integer.toString(id)).build().toString();
+        
         
         for (GenericLinkWrapper<Artist> pl : artist) {
 
@@ -70,6 +71,7 @@ public class ArtistResource {
                     build().toString();
             pl.setLink(new Link(uri, "Artist songs"));
         }
+        String uri2 = this.uriInfo.getBaseUriBuilder().path(ArtistResource.class).path(Integer.toString(id)).build().toString();
         GenericLinkWrapper pl = new GenericLinkWrapper();
         pl.setLink(new Link(uri2, "Self"));
         artist.add(pl);
@@ -140,7 +142,8 @@ public class ArtistResource {
 
     @Path("{artistId}/songs/")
     public SongResource getSongs() {
-        GenericLinkWrapperFactory<Song> glwfs = new GenericLinkWrapperFactory<Song>();
-        return new SongResource(mainService, glwfs );
+//        GenericLinkWrapperFactory<Song> glwfs = new GenericLinkWrapperFactory<Song>();
+//        return new SongResource(mainService, glwfs );
+        return rc.getResource(SongResource.class);
     }
 }

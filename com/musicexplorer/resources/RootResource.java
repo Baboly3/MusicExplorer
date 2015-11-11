@@ -6,7 +6,6 @@
 package com.musicexplorer.resources;
 
 
-import com.musicexplorer.org.entity.Artist;
 import com.musicexplorer.org.utils.Link;
 import java.util.ArrayList;
 import java.util.List;
