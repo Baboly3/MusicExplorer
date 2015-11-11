@@ -57,7 +57,7 @@ public class Song implements DatePersistance , Serializable {
     @Column(name = "id")
     private Integer id;
     @Size(max = 45)
-    @Column(name = "title")
+    @Column(name = "title", unique = true)
     private String title;
     @Column(name = "duration")
     private Double duration;

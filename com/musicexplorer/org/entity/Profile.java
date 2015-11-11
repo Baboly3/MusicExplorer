@@ -57,6 +57,9 @@ public class Profile implements DatePersistance, Serializable {
     @Column(name = "lastName", nullable = false)
     private String lastName;
     @Size(max = 45)
+    @Column(name = "userName", nullable = false, unique = true)
+    private String userName;
+    @Size(max = 45)
     @Column(name = "password", nullable = false)
     private String password;
     @Column(name = "created", updatable = false, insertable = false)
@@ -116,7 +119,6 @@ public class Profile implements DatePersistance, Serializable {
     public Date getUpdated() {
         return updated;
     }
-    
 
     @XmlTransient
     public List<Follower> getFollowerCollection() {

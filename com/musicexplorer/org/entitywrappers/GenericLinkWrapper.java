@@ -7,6 +7,7 @@
 package com.musicexplorer.org.entitywrappers;
 
 import com.musicexplorer.org.utils.Link;
+import java.util.Objects;
 
 /**
  *
@@ -39,5 +40,27 @@ public class GenericLinkWrapper<T> {
 
     public void setLink(Link link) {
         this.link = link;
-    }   
+    }  
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 41 * hash + Objects.hashCode(this.entity);
+        hash = 41 * hash + Objects.hashCode(this.link);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final GenericLinkWrapper<?> other = (GenericLinkWrapper<?>) obj;
+        return true;
+    }
+    
+    
 }

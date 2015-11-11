@@ -8,6 +8,7 @@ package com.musicexplorer.resources;
 import com.musicexplorer.exception.DataNotFoundException;
 import com.musicexplorer.interfaces.MainService;
 import com.musicexplorer.org.entity.Artist;
+import com.musicexplorer.org.entity.Playlist;
 import com.musicexplorer.org.entity.Song;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapper;
 import com.musicexplorer.org.entitywrappers.GenericLinkWrapperFactory;
@@ -58,6 +59,9 @@ public class ArtistResource {
         List<Artist> list = new ArrayList<Artist>();
         list.add(mainService.getArtistService().find(id));
         List<GenericLinkWrapper> artist = genericLWF.getById(list);
+        
+        String uri2 = this.uriInfo.getBaseUriBuilder().path(ArtistResource.class).path(Integer.toString(id)).build().toString();
+        
         for (GenericLinkWrapper<Artist> pl : artist) {
 
             String uri = uriInfo.getBaseUriBuilder().
@@ -66,6 +70,10 @@ public class ArtistResource {
                     build().toString();
             pl.setLink(new Link(uri, "Artist songs"));
         }
+        GenericLinkWrapper pl = new GenericLinkWrapper();
+        pl.setLink(new Link(uri2, "Self"));
+        artist.add(pl);
+        
         return Response.status(Status.OK).entity(artist).build();
     }
 
@@ -74,14 +82,18 @@ public class ArtistResource {
         this.uriInfo = uriInfo;
         Artist artist = new Artist();
         List<GenericLinkWrapper> artistList = genericLWF.getAll(artist);
+        int i = 0;
 
         for (GenericLinkWrapper<Artist> gl : artistList) {
+            
             String uri = this.uriInfo.getBaseUriBuilder().
                     path(ArtistResource.class).
                     path(Integer.toString(gl.getEntity().getId())).
                     build().toString();
-            gl.setLink(new Link(uri, "artist"));
+            gl.setLink(new Link(uri, "artist"));   
+           
         }
+           
         return Response.status(Status.OK).entity(artistList).build();
 
     }

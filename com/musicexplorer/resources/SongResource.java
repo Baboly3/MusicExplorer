@@ -77,11 +77,11 @@ public class SongResource {
                 artistSonglist.setLink(new Link(uri, "Artist Song"));
             }
             
-            CacheControl cc = cashing.setCacheControl(86400, true, list);
+            CacheControl cc = cashing.setCacheControl(86400, true, songLinkList);
 
             Response.ResponseBuilder builder = request.evaluatePreconditions(cashing.getEntityTag());
             if (builder == null) {
-                builder = Response.ok(list);
+                builder = Response.ok(songLinkList);
                 builder.tag(cashing.getEntityTag());
             }
             builder.cacheControl(cc);
@@ -98,10 +98,10 @@ public class SongResource {
                         build().toString();
                 playlistSongList.setLink(new Link(uri, "Artist Song"));
             }           
-            CacheControl cc = cashing.setCacheControl(86400, true, list);
+            CacheControl cc = cashing.setCacheControl(86400, true, songLinkList);
             Response.ResponseBuilder builder = request.evaluatePreconditions(cashing.getEntityTag());
             if (builder == null) {
-                builder = Response.ok(list);
+                builder = Response.ok(songLinkList);
                 builder.tag(cashing.getEntityTag());
             }
             builder.cacheControl(cc);
@@ -109,8 +109,8 @@ public class SongResource {
         }
         this.uriInfo = uriInfo;
         Song song = new Song();
-        List<GenericLinkWrapper> songList = genericLWF.getAll(song);
-        for (GenericLinkWrapper<Song> gl : songList) {
+        songLinkList = genericLWF.getAll(song);
+        for (GenericLinkWrapper<Song> gl : songLinkList) {
             String uri = this.uriInfo.getBaseUriBuilder().
                     path(SongResource.class).
                     path(Integer.toString(gl.getEntity().getId()))
@@ -118,10 +118,10 @@ public class SongResource {
             gl.setLink(new Link(uri, "songs"));
         }
 
-        CacheControl cc = cashing.setCacheControl(86400, true, list);
+        CacheControl cc = cashing.setCacheControl(10, true, songLinkList);
         Response.ResponseBuilder builder = request.evaluatePreconditions(cashing.getEntityTag());
         if (builder == null) {
-            builder = Response.ok(list);
+            builder = Response.ok(songLinkList);
             builder.tag(cashing.getEntityTag());
         }
         builder.cacheControl(cc);
