@@ -18,10 +18,10 @@ import java.util.List;
 import javax.ejb.EJB;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -52,22 +52,6 @@ public class PlaylistResource {
     UriInfo uriInfo;
     @Context
     ResourceContext rc;
-
-    public PlaylistResource() {
-        try {
-            String lookupName = "java:module/MainServiceFacade";
-            String lookupName2 = "java:module/GenericLinkWrapperFactory";
-            mainService = (MainService) InitialContext.doLookup(lookupName);
-            genericLWF = (GenericLinkWrapperFactory) InitialContext.doLookup(lookupName2);
-        } catch (NamingException e) {
-            System.out.println("EXCEPTION MESSAGE:::" + e.getMessage());
-        }
-    }
-
-    public PlaylistResource(MainService mainService, GenericLinkWrapperFactory genericLinkWrapperFactory) {
-        this.mainService = mainService;
-        this.genericLWF = genericLinkWrapperFactory;
-    }
 
     @GET
     @Path("{playlistId}/")
@@ -125,7 +109,7 @@ public class PlaylistResource {
     }
 
     @POST
-    public Response addPlaylist(Playlist playlist, @PathParam("profileId") int id
+    public Response addPlaylist(@Valid Playlist playlist, @PathParam("profileId") int id
     ) {
         if (mainService.getPlaylistService().getProfile(id) != null) {
             playlist.setProfileid(mainService.getPlaylistService().getProfile(id));
@@ -144,8 +128,9 @@ public class PlaylistResource {
 
     @PUT
     @Path("{playlistId}")
-    public Response addSongsToPlaylist(Playlist playlist, @PathParam("playlistId") int pid
-    ) {
+    public Response addSongsToPlaylist(@Valid Playlist playlist, 
+                                       @PathParam("playlistId") int pid) {
+        
         Playlist mPlaylist = new Playlist();
 
         if (mainService.getPlaylistService().find(pid) != null) {
@@ -179,8 +164,6 @@ public class PlaylistResource {
 
     @Path("{playlistId}/songs/")
     public SongResource getSongs() {
-//        GenericLinkWrapperFactory<Song> glwfs = new GenericLinkWrapperFactory<Song>();
-//        return new SongResource(mainService , glwfs);
         return rc.getResource(SongResource.class);
     }
 }

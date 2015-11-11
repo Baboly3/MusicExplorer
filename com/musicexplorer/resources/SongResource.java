@@ -197,18 +197,8 @@ public class SongResource {
         System.out.println("Song id: " + songId);
         if (mainService.getSongService().find(songId) == null) {
             throw new DataNotFoundException("This id doesnt exist");
-        } else if (mainService.getSongService().find(songId) != null) {
-            Song mSong = mainService.getSongService().find(songId);
-            song.setId(songId);
-            if (song.getTitle() == null) {
-                song.setTitle(mSong.getTitle());
-            }
-            if (song.getDuration() == null) {
-                song.setDuration(mSong.getDuration());
-            }
+        } 
             mainService.getSongService().edit(song);
             return Response.ok().build();
         }
-        return Response.status(Response.Status.NOT_FOUND).build();
-    }
 }

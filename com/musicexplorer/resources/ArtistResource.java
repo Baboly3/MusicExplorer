@@ -64,7 +64,6 @@ public class ArtistResource {
         
         
         for (GenericLinkWrapper<Artist> pl : artist) {
-
             String uri = uriInfo.getBaseUriBuilder().
                     path(ArtistResource.class).
                     path(Integer.toString(pl.getEntity().getId())).path("songs").
@@ -74,8 +73,7 @@ public class ArtistResource {
         String uri2 = this.uriInfo.getBaseUriBuilder().path(ArtistResource.class).path(Integer.toString(id)).build().toString();
         GenericLinkWrapper pl = new GenericLinkWrapper();
         pl.setLink(new Link(uri2, "Self"));
-        artist.add(pl);
-        
+        artist.add(pl);      
         return Response.status(Status.OK).entity(artist).build();
     }
 
@@ -85,17 +83,13 @@ public class ArtistResource {
         Artist artist = new Artist();
         List<GenericLinkWrapper> artistList = genericLWF.getAll(artist);
         int i = 0;
-
-        for (GenericLinkWrapper<Artist> gl : artistList) {
-            
+        for (GenericLinkWrapper<Artist> gl : artistList) {        
             String uri = this.uriInfo.getBaseUriBuilder().
                     path(ArtistResource.class).
                     path(Integer.toString(gl.getEntity().getId())).
                     build().toString();
-            gl.setLink(new Link(uri, "artist"));   
-           
-        }
-           
+            gl.setLink(new Link(uri, "artist"));     
+        }          
         return Response.status(Status.OK).entity(artistList).build();
 
     }
@@ -118,32 +112,13 @@ public class ArtistResource {
 
     @PUT
     @Path("{artistId}")
-    public Response editArtist(@Valid Artist artist, @PathParam("artistId") int id) {
-        
-        if (mainService.getArtistService().find(id) != null) {
-            Artist mArtist = new Artist();
-            mArtist = mainService.getArtistService().find(id);
-            artist.setId(id);
-        if(artist.getGenrer() == null){
-            artist.setGenrer(mArtist.getGenrer());
-        }    
-        if(artist.getHistory() == null){
-            artist.setHistory(mArtist.getHistory());
-        }
-        if(artist.getName() == null){
-            artist.setName(mArtist.getName());
-        }
+    public Response editArtist(@Valid Artist artist, @PathParam("artistId") int id) {      
             mainService.getArtistService().edit(artist);
             return Response.ok().build();
-        } else {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
     }
 
     @Path("{artistId}/songs/")
     public SongResource getSongs() {
-//        GenericLinkWrapperFactory<Song> glwfs = new GenericLinkWrapperFactory<Song>();
-//        return new SongResource(mainService, glwfs );
         return rc.getResource(SongResource.class);
     }
 }

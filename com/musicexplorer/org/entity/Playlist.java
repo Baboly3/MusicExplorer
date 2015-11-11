@@ -30,6 +30,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -57,6 +58,7 @@ public class Playlist implements DatePersistance, Serializable {
     @Column(name = "id")
     private Integer id;
     @Size(max = 45)
+    @NotNull
     @Column(name = "Name")
     private String playlist;
     @Column(name = "created")

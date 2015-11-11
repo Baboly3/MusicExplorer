@@ -31,7 +31,7 @@ public class Cashing<T> {
         return cc;
     }
     public EntityTag getEntityTag(){        
-         EntityTag eTag = new EntityTag(Integer.toString(hashValue));
+         EntityTag eTag = new EntityTag(String.valueOf(hashValue));
          return eTag;
     }
 }
