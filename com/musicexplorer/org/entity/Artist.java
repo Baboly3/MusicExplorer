@@ -26,6 +26,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -53,15 +54,18 @@ public class Artist implements DatePersistance, Serializable {
     @Column(name = "id")
     private Integer id;
     @Size(max = 45)
+    @Pattern(regexp = "/^[a-zA-ZäöåÄÖÅ]+$/")
     @NotNull
     @Column(name = "name", unique = true)
     private String name;
     @Size(max = 255)
     @NotNull
+    @Pattern(regexp = "/^[a-zA-ZäöåÄÖÅ]+$/")
     @Column(name = "history")
     private String history;
     @Size(max = 45)
     @NotNull
+    @Pattern(regexp = "/^[a-zA-ZäöåÄÖÅ]+$/")
     @Column(name = "genrer")
     private String genrer;
     @Column(name = "created")

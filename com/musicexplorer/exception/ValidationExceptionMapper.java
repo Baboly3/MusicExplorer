@@ -23,7 +23,7 @@ public class ValidationExceptionMapper implements ExceptionMapper<ValidationExce
 
     @Override
     public Response toResponse(ValidationException ex) {
-        ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 3543, "http://docs.mysite.com/doc.html");
+        ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), 3543, "http://musicExplorer.se/api/documentation");
         if (ex instanceof ConstraintDeclarationException) {
             System.out.println("ConstraintDeclarationException ");
         } else if (ex instanceof ConstraintDefinitionException) {

@@ -23,6 +23,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -49,6 +50,7 @@ public class Share implements Serializable {
     @Temporal(TemporalType.DATE)
     private Date date;
     @Size(max = 255)
+    @Pattern(regexp = "/^[a-zA-ZäöåÄÖÅ]+$/")
     @Column(name = "note")
     private String note;
     @JoinColumn(name = "Playlist_id", referencedColumnName = "id")

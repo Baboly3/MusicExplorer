@@ -26,6 +26,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -52,10 +53,12 @@ public class Profile implements DatePersistance, Serializable {
     @Column(name = "id")
     private Integer id;
     @NotNull
+    @Pattern(regexp = "/^[a-zA-ZäöåÄÖÅ]+$/")
     @Size(max = 45)
     @Column(name = "firstName", nullable = false)
     private String firstName;
     @NotNull
+    @Pattern(regexp = "/^[a-zA-ZäöåÄÖÅ]+$/")
     @Size(max = 45)
     @Column(name = "lastName", nullable = false)
     private String lastName;

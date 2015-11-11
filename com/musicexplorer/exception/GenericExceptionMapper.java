@@ -20,7 +20,7 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable>{
 
     @Override
     public Response toResponse(Throwable ex) {
-        ErrorMessage message = new ErrorMessage(ex.getMessage(), 500, "http://link.com");
+        ErrorMessage message = new ErrorMessage(ex.getMessage(), 500, "http://musicExplorer.se/api/documentation");
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(message).build();
     }
     
